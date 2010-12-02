@@ -11,7 +11,8 @@ SRC = Application.cpp \
 	Schema.cpp \
 	Tuple.cpp \
 	Projection.cpp \
-	Attribute.cpp
+	Attribute.cpp \
+	NestedBlockJoin.cpp
 
 all:
 	g++ -g -O0 $(SRC)
