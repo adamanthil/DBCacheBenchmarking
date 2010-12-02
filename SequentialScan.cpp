@@ -7,21 +7,19 @@
 #include "BufferManager.h"
 
 SequentialScan::SequentialScan(const std::string & filename,
-			       std::vector<Attribute *> & attributes) :
-  m_attributes(attributes)
+			       Schema * inSchema,
+			       Schema * outSchema)
 {
-  
   m_fd = FileManager::getInstance()->open(filename);
   m_buffer = BufferManager::getInstance()->allocate();
   
-  m_recordSz = 0;
-  for (int i = 0; i < m_attributes.size(); i++)
-    {
-      m_recordSz += m_attributes[i]->size();
-    }
+  m_schema[IN] = inSchema;
+  m_schema[OUT] = outSchema;
 
-  m_record = new byte[m_recordSz];
-  m_schema = NULL;
+  for (int i = 0; i < 2; i++)
+    {
+      m_data[i] = new byte[m_schema[i]->rsize()];
+    }
 }
 
 SequentialScan::~SequentialScan()
@@ -35,41 +33,50 @@ SequentialScan::~SequentialScan()
     {
       FileManager::getInstance()->close(m_fd);
     }
-
-  delete [] m_record;
+  
+  for (int i = 0; i < 2; i++)
+    {
+      delete [] m_data[i];
+    }
 }
 
-bool SequentialScan::moveNext()
+bool SequentialScan::moveNext() 
 {
   int offset = 0;
   int available = m_buffer->capacity();
+  size_t rsize = m_schema[OUT]->rsize();
 
   m_buffer->clear();
-
-  while (!m_fd->eof() && available >= m_recordSz)
+  int nrecords = 0;
+  while (!m_fd->eof() && available >= rsize)
     {
-      std::cerr << "reading page" << std::endl;
-      DiskPage * page =  BufferManager::getInstance()->read(m_fd);
 
-      for (int rid = 0; rid < page->size() && available >= m_recordSz; rid++)
-	{
-	  std::cerr << "reading records on page" << std::endl;
+      DiskPage * page = BufferManager::getInstance()->read(m_fd);
+      
+      for (int rid = 0; rid < page->size() && available >= rsize; rid++)
+	{ 
 	  
-	  //if (isMatch(m_tuple.setValues(
-
+	  //if (satisfies(....)
 	  /* create tuple */
-	  for (int i = 0; i < m_attributes.size(); i++)
+	  for (int i = 0; i < m_schema[OUT]->nitems(); i++)
 	    {
-	      std::cerr << "getting attribute[" 
-			<< "]" << std::endl;
-	      memset(m_record, 0, m_recordSz);
-	      page->get(rid, m_attributes[i]->name(), m_record, 
-			m_attributes[i]->size());
-	      std::cerr << m_record << std::endl;
-	      offset = m_buffer->put(m_record, offset, m_attributes[i]->size());
+	      Attribute * attribute = (*m_schema[OUT])[i];
+	      
+	      memset(m_data[OUT], 0, rsize);
+	      page->get(rid, attribute->name(), m_data[OUT], 
+			attribute->size());
+	      offset = m_buffer->put(m_data[OUT], offset, 
+				     attribute->size());
 	    }  
+	  
+	  available -= rsize;
+	  nrecords++;
+	
 	}
     }
+
+  m_buffer->setSize(nrecords);
+  return  nrecords > 0;
 }
 
 void SequentialScan::next(MemoryBlock & block)

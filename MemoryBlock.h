@@ -3,7 +3,7 @@
 
 #include <cstring>
 
-typedef unsigned char byte;
+#include "globals.h"
 
 class MemoryBlock
 {

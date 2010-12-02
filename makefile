@@ -14,5 +14,6 @@ SRC = Application.cpp \
 	Attribute.cpp
 
 all:
-	g++ $(SRC)
+	g++ -g -O0 $(SRC)
+
 

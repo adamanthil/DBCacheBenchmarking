@@ -31,13 +31,16 @@ FileManager::FileManager()
       
       {1, "3949493484",
        "Andrew              ",
-       "Bender              ", 'M', 200001001, "JR"}
+       "Bender              ", 'M', 2001, "JR"},
+      {2, "3879093894",
+       "Emma                ",
+       "Turetsky            ", 'F', 2010, "SR"}
     };
   int offset = 0;
 
-  MemoryBlock * b = new MemoryBlock(512);
+  MemoryBlock * b = new MemoryBlock(sizeof(Student) * 2);
 
-  for (int i = 0; i < sizeof(s) / sizeof(Student); i++)
+  for (int i = 0; i < 2; i++)
     {
       offset = b->put((byte*)&s[i].id, offset, sizeof(s[i].id));
       offset = b->put((byte*)&s[i].ssn, offset, sizeof(s[i].ssn) - 1);
@@ -48,7 +51,24 @@ FileManager::FileManager()
       offset = b->put((byte*)&s[i].year, offset, sizeof(s[i].year) - 1);
     }
   //m_files[0] = new std::vector<DiskPage *>();
-  b->setSize(sizeof(s) / sizeof(Student));
+  b->setSize(2);
+  m_files[0].push_back(new DiskPage(NULL, b, "Student"));
+
+  b = new MemoryBlock(sizeof(Student) * 2);
+
+  offset=0;
+  for (int i = 2; i < sizeof(s) / sizeof(Student); i++)
+    {
+      offset = b->put((byte*)&s[i].id, offset, sizeof(s[i].id));
+      offset = b->put((byte*)&s[i].ssn, offset, sizeof(s[i].ssn) - 1);
+      offset = b->put((byte*)&s[i].fname, offset, sizeof(s[i].fname) - 1);
+      offset = b->put((byte*)&s[i].lname, offset, sizeof(s[i].lname) - 1);
+      offset = b->put((byte*)&s[i].gender, offset, sizeof(s[i].gender));
+      offset = b->put((byte*)&s[i].birthdate, offset, sizeof(s[i].birthdate));
+      offset = b->put((byte*)&s[i].year, offset, sizeof(s[i].year) - 1);
+    }
+  //m_files[0] = new std::vector<DiskPage *>();
+  b->setSize(1);
   m_files[0].push_back(new DiskPage(NULL, b, "Student"));
 }
 

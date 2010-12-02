@@ -13,18 +13,21 @@
 class SequentialScan : public IRelationalOperator
 {
  private:
+  enum { IN=0, OUT=1 };
   FileDescriptor * m_fd;
   MemoryBlock * m_buffer;
 
-  byte * m_record;
-  size_t m_recordSz;
-
-  Schema * m_schema;
-  std::vector<Attribute *> & m_attributes;
+  Schema * m_schema[2];
+  byte * m_data[2];
+  Tuple * m_tuple[2];
+  BooleanExpression * whereClause;
   
  public:
   SequentialScan(const std::string & filename,
-		 std::vector<Attribute *> & attributes);
+		 Schema * inSchema, Schema * outSchema);
+  SequentialScan(const std::string & filename,
+		 Schema & inSchema, Schema & outSchema,
+		 BooleanExpression & whereClause);
 
   /*
   public SequentialScan(std::string & filename, 

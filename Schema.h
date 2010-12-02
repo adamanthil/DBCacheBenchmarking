@@ -2,16 +2,19 @@
 #define SCHEMA_H_
 
 #include <vector>
-#include <string>
 #include <cstring>
 
 #include "Attribute.h"
 
-class Schema
+class Schema : public std::vector<Attribute *>
 {
  private:
+  size_t m_size;
  public:
-  size_t offset(std::string field);
+  Schema();
+  void add(Attribute * attribute);
+  size_t rsize() const;
+  size_t nitems() const;
 };
 
 #endif

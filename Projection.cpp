@@ -3,10 +3,11 @@
 #include "Tuple.h"
 
 Projection::Projection(IRelationalOperator & child,
-		       std::vector<Attribute *> & attributes) :
+		       Schema & schema) :
   m_child(child)
 {
   m_buffer = BufferManager::getInstance()->allocate();
+  m_tuple.m_schema = &schema;
 }
 
 bool Projection::moveNext()
@@ -24,6 +25,10 @@ void Projection::next(MemoryBlock & buffer)
 void Projection::dump(std::ostream & stream, char fs, char rs)
 {
   int recsize = 0;
+  byte data[256];
+
+  m_tuple.data(data);
+
   while (m_child.moveNext())
     {
       int offset = 0;
@@ -32,8 +37,9 @@ void Projection::dump(std::ostream & stream, char fs, char rs)
       m_child.next(*m_buffer);
       for (int i = 0; i < m_buffer->getSize(); i++)
 	{
-	  //	  tuple.data(m_buffer + offset);
-	  //ostream << tuple.toString(fs) << rs;
+	  m_buffer->get(data, i * m_tuple.m_schema->rsize(), 
+			m_tuple.m_schema->rsize());
+	  m_tuple.dump(stream, fs, rs);
 	}
     }
 

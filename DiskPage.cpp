@@ -7,7 +7,6 @@ DiskPage::DiskPage(const PageLayout * layout, MemoryBlock * block,
 		   const std::string & table) :
   m_block(block), m_layout(NULL), m_table(table)
 {
-  std::cerr << "tbl=" << m_table << std::endl;
 }
 
 size_t DiskPage::size() const
