@@ -12,21 +12,32 @@ void Tuple::schema(const Schema * schema)
   m_schema = schema;
 }
 
-void Tuple::data(byte * values)
+const Schema * Tuple::schema() const 
 {
-  m_data = values;
+  return m_schema;
 }
 
 void Tuple::value(int * buffer, const Attribute & attribute) const
 {
+  value(buffer, sizeof(int), attribute);
+}
+
+void Tuple::value(char * buffer, const Attribute & attribute) const
+{
+  value(buffer, attribute.size(), attribute);
+}
+
+void Tuple::value(void * buffer, size_t length, 
+		  const Attribute & attribute) const
+{
   int offset = m_schema->offset(&attribute);
-  memcpy(buffer, m_data + offset, sizeof(int));
+  memcpy(buffer, m_data + offset, length);
 }
 
 void Tuple::dump(std::ostream & output, char fs, char rs)
 {
   int offset = 0;
-  char * buffer = new char[m_schema->rsize()];
+  char * buffer = new char[m_schema->rsize() + 1]; // + 1 for eof marker
   for (int i = 0; i < m_schema->nitems(); i++)
     {
       Attribute * attribute = m_schema->at(i);

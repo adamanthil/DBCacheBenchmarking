@@ -7,26 +7,25 @@
 #include "FileDescriptor.h"
 #include "IRelationalOperator.h"
 #include "Attribute.h"
-#include "Predicate.h"
 #include "MemoryBlock.h"
+#include "Clause.h"
 
 class SequentialScan : public IRelationalOperator
 {
  private:
-  enum { IN=0, OUT=1 };
   FileDescriptor * m_fd;
   MemoryBlock * m_buffer;
+  WhereClause * m_clause;
+  Schema * m_schema;
+  byte * m_data;
 
-  Schema * m_schema[2];
-  byte * m_data[2];
-  Tuple m_tuple;
-  BooleanExpression * whereClause;
+  byte * extract(byte *, const DiskPage *, int, const Schema *);
   
  public:
   SequentialScan(const std::string & filename,
 		 Schema * schema);
-  SequentialScan(const std::string & filename, Schema * outSchema,
-		 Schema * inSchema, BooleanExpression * whereClause);
+  SequentialScan(const std::string & filename, Schema * schema,
+		 WhereClause * clause);
   ~SequentialScan();
 
   //  virtual const Schema & schema();

@@ -4,80 +4,60 @@
 
 #include "SequentialScan.h"
 #include "FileManager.h"
-
 #include "BufferManager.h"
 
 SequentialScan::SequentialScan(const std::string & filename, Schema * schema)
 {
   m_fd = FileManager::getInstance()->open(filename);
   m_buffer = BufferManager::getInstance()->allocate();
-  
-  m_schema[IN] = NULL;
-  m_schema[OUT] = schema;
-  
-  m_data[IN] = NULL;
-  m_data[OUT] = new byte[m_schema[OUT]->rsize()];
-  
-  m_boolExp = NULL;
+  m_clause = NULL;
+  m_schema = schema;
+  m_data = new byte[m_schema->rsize()];
 }
 
-SequentialScan::SequentialScan(const std::string & filename,
-			       Schema * outSchema, Schema * inSchema,
-			       BooleanExpression * whereClause)
+SequentialScan::SequentialScan(const std::string & filename, Schema * schema,
+			       WhereClause * clause)
 {
   m_fd = FileManager::getInstance()->open(filename);
   m_buffer = BufferManager::getInstance()->allocate();
-  
-  m_schema[IN] = inSchema;
-  m_schema[OUT] = outSchema;
-  
-  for (int i = 0; i < 2; i++)
-    {
-      m_data[i] = new byte[m_schema[i]->rsize()];
-    }
-  
-  m_boolExp = whereClause;
-
-  m_tuple.schema(m_schema[IN]);
-  m_tuple.data(m_data[IN]); 
- 
-  const std::vector<IVariableOperand *> * vector = m_boolExp->variables();
-  for (int i = 0; i < vector->size(); i++)
-    {
-      IVariableOperand * v = vector->at(i);
-      v->data(&m_tuple);
-    }
+  m_schema = schema;
+  m_clause = clause;
+  m_data = new byte[m_schema->rsize()];
 }
 
 SequentialScan::~SequentialScan()
 {
-  if (m_buffer != NULL)
-    {
-      BufferManager::getInstance()->deallocate(m_buffer);
-    }
+  BufferManager::getInstance()->deallocate(m_buffer);
+  FileManager::getInstance()->close(m_fd);
+  delete [] m_data;
+}
 
-  if (m_fd != NULL)
+byte * SequentialScan::extract(byte * buffer, const DiskPage * page, 
+			       int rid, const Schema * schema)
+{
+  int offset = 0;
+  for (int i = 0; i < schema->nitems(); i++)
     {
-      FileManager::getInstance()->close(m_fd);
+      const Attribute * attribute = schema->at(i);
+      page->get(rid, attribute->name(), buffer + offset, attribute->size());
+      offset += attribute->size();
     }
   
-  for (int i = 0; i < 2; i++)
-    {
-      if (m_data[i])
-	{
-	  delete [] m_data[i];
-	}
-    }
+  return buffer;
 }
 
 bool SequentialScan::moveNext() 
 {
+  int nrecords = 0;
   int offset = 0;
   int available = m_buffer->capacity();
-  size_t rsize = m_schema[OUT]->rsize();
+  size_t rsize = m_schema->rsize();
 
+  Tuple tuple;
+  byte buffer[256]; // TODO: 
+
+  tuple.m_data = buffer;
   m_buffer->clear();
-  int nrecords = 0;
   while (!m_fd->eof() && available >= rsize)
     {
 
@@ -86,31 +66,17 @@ bool SequentialScan::moveNext()
       for (int rid = 0; rid < page->size() && available >= rsize; rid++)
 	{ 
 
-	  /* extract d for comparison. */
-	  if (m_schema[IN])
+	  /* extract data to update variable expressions. */
+	  if (m_clause != NULL)
 	    {
-	      for (int i = 0; i < m_schema[IN]->nitems(); i++)
-		{
-		  Attribute * attribute = (*m_schema[IN])[i];
-		  memset(m_data[IN], 0, m_schema[IN]->rsize());
-		  page->get(rid, attribute->name(), m_data[IN],
-			    attribute->size());
-		}
+	      extract(buffer, page, rid, m_clause->schema()); 
 	    }
 
-	  if (satisfies())
+	  /* extract tuple */
+	  if (m_clause == NULL || m_clause->evaluate(tuple))
 	    {
-	      for (int i = 0; i < m_schema[OUT]->nitems(); i++)
-		{
-		  Attribute * attribute = (*m_schema[OUT])[i];
-		  
-		  memset(m_data[OUT], 0, rsize);
-		  page->get(rid, attribute->name(), m_data[OUT], 
-			    attribute->size());
-		  offset = m_buffer->put(m_data[OUT], offset, 
-					 attribute->size());
-		}  
-	      
+	      offset = m_buffer->put(extract(m_data, page, rid, m_schema), 
+				     offset, m_schema->rsize());
 	      available -= rsize;
 	      nrecords++;
 	    }

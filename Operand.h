@@ -12,7 +12,7 @@ class IOperand
 {
  public: 
   virtual T value() = 0;
-  virtual int compareTo(IOperand<T> * other) = 0;
+  virtual int compareTo(IOperand<T> & other) = 0;
 };
 
 template<typename T>
@@ -24,7 +24,7 @@ class Operand : public IOperand<T>
  public:
   Operand(Type type, field_type_t fldType);
   virtual T value() = 0;
-  virtual int compareTo(IOperand<T> * other);
+  virtual int compareTo(IOperand<T> & other);
   virtual Type type() { return m_type; }
 };
 
@@ -45,7 +45,7 @@ class IVariableOperand
 };
 
 template<typename T>
-class VariableOperand : public Operand<T>, IVariableOperand
+class VariableOperand : public Operand<T>, public IVariableOperand
 {
  public:
   const Tuple * m_tuple;
@@ -67,9 +67,9 @@ Operand<T>::Operand(Type opType, field_type_t fieldType)
 }
 
 template<typename T>
-int Operand<T>::compareTo(IOperand<T> * other)
+int Operand<T>::compareTo(IOperand<T> & other)
 {
-  std::cerr << "comparing " << value() << " to " << other->value() 
+  std::cerr << "comparing " << value() << " to " << other.value() 
 	    << std::endl;
 
   switch (m_fieldType)
@@ -77,9 +77,9 @@ int Operand<T>::compareTo(IOperand<T> * other)
     case INTEGER:
     case BIT:
     case CHAR:
-      return value() - other->value();
+      return value() - other.value();
     case STRING:
-      return strcmp((char *)value(), (char *)other->value());
+      return strcmp((char *)value(), (char *)other.value());
     case REAL:
       return 0;
     }
@@ -121,12 +121,21 @@ VariableOperand<T>::~VariableOperand()
     }
 }
 
+/*
+
+template<> const char * VariableOperand<const char *>::value()
+{
+  //m_tuple->value((const char *)m_buffer, *m_attribute);
+  return (const char *)m_buffer;
+} 
+
+/ *
 template<typename T>
 T VariableOperand<T>::value()
 {
-  m_tuple->value((int *)m_buffer, *m_attribute);
-  return *(int *)m_buffer;  
+  return 0;
 } 
+*/
 
 template<typename T>
 void VariableOperand<T>::data(const Tuple * t)

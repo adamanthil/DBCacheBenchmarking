@@ -15,7 +15,7 @@ size_t DiskPage::size() const
 }
 
 void DiskPage::get(int rid, const std::string & field, 
-		   byte * buffer, size_t length)
+		   byte * buffer, size_t length) const
 {
   if (m_table == "Student")
     {

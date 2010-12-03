@@ -29,7 +29,7 @@ void Projection::dump(std::ostream & stream, char fs, char rs)
 {
   byte * data = new byte[m_rsize];
 
-  m_tuple.data(data);
+  m_tuple.m_data = data;
 
   while (m_child.moveNext())
     {

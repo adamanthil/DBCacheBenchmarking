@@ -24,14 +24,14 @@ template<typename T>
 class Predicate : public IPredicate
 {
  public:
-  IOperand<T> * m_lOperand;
-  IOperand<T> * m_rOperand;
+  IOperand<T> & m_lOperand;
+  IOperand<T> & m_rOperand;
   operator_t m_op;
  public:
-  Predicate(IOperand<T> * lOperand, IOperand<T> * rOperand, operator_t op);
+  Predicate(IOperand<T> & lOperand, IOperand<T> & rOperand, operator_t op);
   
-  const IOperand<T> leftOperand() const;
-  const IOperand<T> rightOperand() const;
+  IOperand<T> leftOperand() const;
+  IOperand<T> rightOperand() const;
   virtual bool eval();
 };
 
@@ -46,15 +46,14 @@ class BooleanExpression
   ~BooleanExpression(); 
   void factor(int disjunct, IPredicate * p);
   bool evaluate();
-  const std::vector<IVariableOperand *> * variables();
+  std::vector<IVariableOperand *> * variables();
 };
 
 template<typename T>
-Predicate<T>::Predicate(IOperand<T> * lOperand, IOperand<T> * rOperand,
-			IPredicate::operator_t op) : m_op(op)
+Predicate<T>::Predicate(IOperand<T> & lOperand, IOperand<T> & rOperand,
+			IPredicate::operator_t op) : 
+m_op(op), m_lOperand(lOperand), m_rOperand(rOperand)
 {
-  m_lOperand = lOperand;
-  m_rOperand = rOperand;
 }
 
 template<typename T>
@@ -63,17 +62,17 @@ bool Predicate<T>::eval()
   switch (m_op)
     {
     case EQ:
-      return m_lOperand->compareTo(m_rOperand) == 0;
+      return m_lOperand.compareTo(m_rOperand) == 0;
     case NE:
-      return m_lOperand->compareTo(m_rOperand) != 0;
+      return m_lOperand.compareTo(m_rOperand) != 0;
     case LT:
-      return m_lOperand->compareTo(m_rOperand) < 0;
+      return m_lOperand.compareTo(m_rOperand) < 0;
     case LE:
-      return m_lOperand->compareTo(m_rOperand) <= 0;
+      return m_lOperand.compareTo(m_rOperand) <= 0;
     case GT:
-      return m_lOperand->compareTo(m_rOperand) > 0;
+      return m_lOperand.compareTo(m_rOperand) > 0;
     case GE:
-      return m_lOperand->compareTo(m_rOperand) >= 0;
+      return m_lOperand.compareTo(m_rOperand) >= 0;
     default:
       return false;
     }

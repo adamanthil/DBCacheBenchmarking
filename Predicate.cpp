@@ -5,39 +5,36 @@ BooleanExpression::BooleanExpression(int ndisjuncts) :
   m_ndisjuncts(ndisjuncts)
 {
   m_predicates = new std::vector<IPredicate *>[m_ndisjuncts];
-  for (int i = 0; i < m_ndisjuncts; i++)
-    {
-      //      m_predicates[i] = new std::vector<IPredicate *>();
-    }
 }
 
 BooleanExpression::~BooleanExpression()
 {
-  for (int i = 0; i < m_ndisjuncts; i++)
-    {
-      //      delete m_predicates[i];
-    }
   delete [] m_predicates;
 }
 
 void BooleanExpression::factor(int disjunct, IPredicate * p)
 {
   // TODO: determine if varible included in factor.
-  Predicate<void> * pp = (Predicate<void> *)p;
+  Predicate<int> * pp = (Predicate<int> *)p;
 
-  if (((Operand<void> *)pp->m_lOperand)->type() == VARIABLE)
+  /*
+  if (((Operand<void>)pp->m_lOperand).type() == VARIABLE)
     {
-      m_variables.push_back((IVariableOperand *)pp->m_lOperand);
+      
+      m_variables.push_back((IVariableOperand *)&pp->m_lOperand);
+      std::cerr << "pushing " << (IVariableOperand *)&pp->m_lOperand 
+		<< "raw " << pp->m_lOperand
+		<< std::endl;
     }
 
   if (((Operand<void> *)pp->m_rOperand)->type() == VARIABLE)
     {
       m_variables.push_back((IVariableOperand *)pp->m_rOperand);
-    }
+      */ 
   m_predicates[disjunct].push_back(p);
 }
 
-const std::vector<IVariableOperand *> * BooleanExpression::variables()
+std::vector<IVariableOperand *> * BooleanExpression::variables()
 {
   return &m_variables;
 }

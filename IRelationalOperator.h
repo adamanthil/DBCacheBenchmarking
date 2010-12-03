@@ -6,21 +6,15 @@
 
 #include "MemoryBlock.h"
 #include "Schema.h"
-#include "Predicate.h"
-#include "Tuple.h"
 
 class IRelationalOperator
 {
- protected:
-  BooleanExpression * m_boolExp;
  public:
   virtual bool moveNext() = 0;
   virtual void next(MemoryBlock & buffer) = 0;
   //virtual const Schema & schema() = 0;
 
   virtual void reset() = 0;
-
-  virtual bool satisfies();
   virtual void dump(std::ostream & strm,
 		    char fs = '|', char rs = '\n') {}
 

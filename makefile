@@ -7,14 +7,16 @@ SRC = Application.cpp \
 	SequentialScan.cpp \
 	BufferManager.cpp \
 	IRelationalOperator.cpp \
-	Predicate.cpp \
 	Schema.cpp \
 	Tuple.cpp \
 	Projection.cpp \
 	Attribute.cpp \
-	NestedBlockJoin.cpp
+	BooleanExpression.cpp \
+	Operand.cpp \
+	Clause.cpp
 
 all:
-	g++ -g -O0 $(SRC)
+	g++ -g -O0 $(SRC) 
 
-
+clean:
+	rm -rf *.o *~ *.out *.exe *.prog
