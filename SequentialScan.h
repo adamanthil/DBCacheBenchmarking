@@ -28,7 +28,7 @@ class SequentialScan : public IRelationalOperator
 		 WhereClause * clause);
   ~SequentialScan();
 
-  //  virtual const Schema & schema();
+  virtual const Schema * schema() const;
   virtual bool moveNext();
   virtual void next(MemoryBlock & buffer);
   virtual void reset();

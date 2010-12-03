@@ -16,13 +16,15 @@ class Tuple
 
   Tuple();
 
-  const byte * m_data;
+  byte * m_data;
 
   void schema(const Schema * schema);
   const Schema * schema() const;
 
   void value(int * buffer, const Attribute & attribute) const;
   void value(char * buffer, const Attribute & attribute) const;
+
+  void map(const Tuple * other);
 
   void dump(std::ostream & strm, char fs = '|', char rs = '\n');
  private:

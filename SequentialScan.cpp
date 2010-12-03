@@ -32,6 +32,11 @@ SequentialScan::~SequentialScan()
   delete [] m_data;
 }
 
+const Schema * SequentialScan::schema() const
+{
+  return m_schema;
+}
+
 byte * SequentialScan::extract(byte * buffer, const DiskPage * page, 
 			       int rid, const Schema * schema)
 {

@@ -34,6 +34,19 @@ void Tuple::value(void * buffer, size_t length,
   memcpy(buffer, m_data + offset, length);
 }
 
+void Tuple::map(const Tuple * other)
+{
+  int offset = 0;
+
+  memset(m_data, 0, m_schema->rsize());
+  for (int i = 0; i < m_schema->nitems(); i++)
+    {
+      const Attribute * attribute = m_schema->at(i);
+      other->value(m_data + offset, attribute->size(), *attribute);
+      offset += attribute->size();
+    }
+}
+
 void Tuple::dump(std::ostream & output, char fs, char rs)
 {
   int offset = 0;

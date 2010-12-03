@@ -69,6 +69,7 @@ Operand<T>::Operand(Type opType, field_type_t fieldType)
 template<typename T>
 int Operand<T>::compareTo(IOperand<T> & other)
 {
+
   std::cerr << "comparing " << value() << " to " << other.value() 
 	    << std::endl;
 
@@ -102,7 +103,7 @@ VariableOperand<T>::VariableOperand(const Attribute * attribute,
 				    field_type_t type) :
 Operand<T>(VARIABLE, type)
 {
-  size_t size = attribute->size() + type == STRING;
+  size_t size = attribute->size() + (type == STRING);
 
   m_tuple = NULL;
 

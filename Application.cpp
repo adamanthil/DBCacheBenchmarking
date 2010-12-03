@@ -19,11 +19,11 @@ typedef ConstantOperand<const char *> StringConstant;
 typedef VariableOperand<int> IntVariable;
 typedef VariableOperand<const char *> StringVariable;
 
-void SelectAll(Schema & schema)
+void SelectAll(Schema & schema, Schema & p)
 {
   IRelationalOperator * scan = new SequentialScan(std::string("Student"), 
 						  &schema);
-  IRelationalOperator * proj = new Projection(*scan, schema);
+  IRelationalOperator * proj = new Projection(*scan, &p);
 
   proj->dump(std::cout);
 
@@ -35,29 +35,35 @@ void SelectWhere(Schema & schema, int field)
 {
   Schema filter;
   
-  IntConstant lOperand(0, INTEGER);
-  IntVariable rOperand(schema.at(0), INTEGER);
+  IntConstant l0(1, INTEGER);
+  IntVariable r0(schema.at(0), INTEGER);
 
-  StringConstant lOperand2("Greig", STRING);
-  StringVariable rOperand2(schema.at(2), STRING);
+  StringConstant l1("Greig               ", STRING);
+  StringVariable r1(schema.at(2), STRING);
 
-  BooleanFactor<int> f(lOperand, EQ, rOperand);
-  BooleanTerm t;
-  BooleanExpression exp(1);
+  BooleanFactor<int> f0(r0, GT, l0);
+  BooleanFactor<const char *> f1(l1, EQ, r1);
+  BooleanTerm t0;
+  BooleanTerm t1;
+  BooleanExpression exp(2);
   std::vector<IVariableOperand *> vars;
 
+  filter.add(schema.at(0));
+  filter.add(schema.at(2));
 
-  filter.add(schema.at(field));
+  t1.factor(&f1);
+  t0.factor(&f0);
+  exp.term(0, &t1);
+  exp.term(1, &t0);
 
-  t.factor(&f);
-  exp.term(0, &t);
-  vars.push_back(&rOperand);
+  vars.push_back(&r0);
+  vars.push_back(&r1);
 
   WhereClause clause(exp, &filter, vars);
 
   IRelationalOperator * scan = 
     new SequentialScan(std::string("Student"), &schema, &clause);
-  IRelationalOperator * proj = new Projection(*scan, schema);
+  IRelationalOperator * proj = new Projection(*scan, &schema);
   proj->dump(std::cout);
 
   delete scan;
@@ -67,15 +73,20 @@ void SelectWhere(Schema & schema, int field)
 int main(int argc, char ** argv)
 {
   Schema schema;
+  Schema projection;
 
-  schema.add(new Attribute(1, "id", "Student", 4, INTEGER));
+  schema.add(new Attribute(0, "id", "Student", 4, INTEGER));
   schema.add(new Attribute(1, "ssn", "Student", 10, STRING));
   schema.add(new Attribute(2, "fname", "Student", 20, STRING));
   schema.add(new Attribute(3, "lname", "Student", 20, STRING));
   schema.add(new Attribute(4, "year", "Student", 2, STRING));
 
-  SelectAll(schema);
-  SelectWhere(schema, 0);
+  projection.add(schema.at(0));
+  projection.add(schema.at(1));
+  projection.add(schema.at(2));
+
+  SelectAll(schema, projection);
+  SelectWhere(schema, 2);
 }
 
 #endif
