@@ -11,7 +11,7 @@ class Projection : public IRelationalOperator
 {
  private:
   MemoryBlock * m_buffer;
-  Schema * m_schema;
+  int m_rsize;
   Tuple m_tuple;
   IRelationalOperator & m_child;
  public:

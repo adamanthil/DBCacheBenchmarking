@@ -1,14 +1,8 @@
 #include "IRelationalOperator.h"
-
-bool IRelationalOperator::isMatch(const Tuple & t)
+#include <stdio.h>
+#include <iostream>
+bool IRelationalOperator::satisfies()
 {
-  return m_boolExp != NULL ? 
-    m_boolExp->evaluate(t) : false;
-}
-
-bool IRelationalOperator::isMatch(const Tuple & t1, 
-				  const Tuple & t2)
-{
-  return m_boolExp != NULL ? 
-    m_boolExp->evaluate(t1, t2) : false;
+  return (m_boolExp != NULL ? 
+	  m_boolExp->evaluate() : true);
 }

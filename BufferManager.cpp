@@ -1,3 +1,4 @@
+#include <new>
 #include "BufferManager.h"
 
 BufferManager * BufferManager::instance = 0;

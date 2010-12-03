@@ -1,48 +1,62 @@
+#include <new>
 #include "Predicate.h"
 
-template<typename T, typename K>
-bool Predicate<T,K>::eval(const Tuple & t)
+BooleanExpression::BooleanExpression(int ndisjuncts) :
+  m_ndisjuncts(ndisjuncts)
 {
-  switch (m_op)
+  m_predicates = new std::vector<IPredicate *>[m_ndisjuncts];
+  for (int i = 0; i < m_ndisjuncts; i++)
     {
-    case EQ:
-      return t.value(m_lOperand.value) == m_rOperand.value;
-    case NE:
-      return t.value(m_lOperand.value) != m_rOperand.value;
-    case LT:
-      return t.value(m_lOperand.value) < m_rOperand.value;
-    case LE:
-      return t.value(m_lOperand.value) <= m_rOperand.value;
-    case GT:
-      return t.value(m_lOperand.value) > m_rOperand.value;
-    case GE:
-      return t.value(m_lOperand.value) >= m_rOperand.value;
-    default:
-      return false;
+      //      m_predicates[i] = new std::vector<IPredicate *>();
     }
 }
 
-bool BooleanExpression::evaluate(const Tuple & t)
+BooleanExpression::~BooleanExpression()
+{
+  for (int i = 0; i < m_ndisjuncts; i++)
+    {
+      //      delete m_predicates[i];
+    }
+  delete [] m_predicates;
+}
+
+void BooleanExpression::factor(int disjunct, IPredicate * p)
+{
+  // TODO: determine if varible included in factor.
+  Predicate<void> * pp = (Predicate<void> *)p;
+
+  if (((Operand<void> *)pp->m_lOperand)->type() == VARIABLE)
+    {
+      m_variables.push_back((IVariableOperand *)pp->m_lOperand);
+    }
+
+  if (((Operand<void> *)pp->m_rOperand)->type() == VARIABLE)
+    {
+      m_variables.push_back((IVariableOperand *)pp->m_rOperand);
+    }
+  m_predicates[disjunct].push_back(p);
+}
+
+const std::vector<IVariableOperand *> * BooleanExpression::variables()
+{
+  return &m_variables;
+}
+
+bool BooleanExpression::evaluate()
 {
   bool flag = false;
-  int m = 0;
 
   // or'd-predicates.
-  for (int i = 0; i < m && !flag; i++)
+  for (int i = 0; i < m_ndisjuncts && !flag; i++)
     {
-      int n = 0;
+      int n = m_predicates[i].size();
       // and-predicates
       flag = true;
       for (int j = 0; j < n && flag; j++)
 	{
-	  flag |= m_predicates[i][j].eval(t);
+	  flag |= m_predicates[i][j]->eval();
 	}
     }
   
   return flag;
-}
-
-bool BooleanExpression::evaluate(const Tuple & t1, const Tuple & t2)
-{
-  return false;
 }

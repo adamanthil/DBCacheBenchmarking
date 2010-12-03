@@ -12,13 +12,17 @@ class Tuple
 {
  private:
   byte * m_data;
+  const Schema * m_schema;
  public:
 
-  Schema * m_schema;
+  Tuple();
+
+  void schema(const Schema * schema);
   void data(byte * values);
 
-  void value(byte * buffer, int fid);
-  void value(int * buffer, int fid);
+  void value(byte * buffer, int fid) const;
+  void value(int * buffer, int fid) const;
+  void value(int * buffer, const Attribute & attribute) const;
 
   void dump(std::ostream & strm, char fs = '|', char rs = '\n');
 };

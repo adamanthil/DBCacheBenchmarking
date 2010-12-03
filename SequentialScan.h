@@ -19,27 +19,14 @@ class SequentialScan : public IRelationalOperator
 
   Schema * m_schema[2];
   byte * m_data[2];
-  Tuple * m_tuple[2];
+  Tuple m_tuple;
   BooleanExpression * whereClause;
   
  public:
   SequentialScan(const std::string & filename,
-		 Schema * inSchema, Schema * outSchema);
-  SequentialScan(const std::string & filename,
-		 Schema & inSchema, Schema & outSchema,
-		 BooleanExpression & whereClause);
-
-  /*
-  public SequentialScan(std::string & filename, 
-			std::vector<Attribute> & attributes,
-			Predicate predicate);
-  
-  public SequentialScan(std::string filename, vector<Attribute> & attributes,
-			vector<Predicate> & predicates);
-  public SequentialScan(std::string filename, vector<Attribute> & attributes,
-			vector<<vector<Predicate>> & predicates);
-  */
-
+		 Schema * schema);
+  SequentialScan(const std::string & filename, Schema * outSchema,
+		 Schema * inSchema, BooleanExpression * whereClause);
   ~SequentialScan();
 
   //  virtual const Schema & schema();

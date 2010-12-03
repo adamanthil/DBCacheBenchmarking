@@ -1,3 +1,4 @@
+#include <new>
 #include "FileManager.h"
 
 FileManager * FileManager::instance = NULL;
@@ -18,6 +19,12 @@ struct Course
   int id;
   char instructor[64];
   char title[32];
+};
+
+struct Roster
+{
+  int sid;
+  int cid;
 };
 
 FileManager::FileManager()
@@ -70,6 +77,9 @@ FileManager::FileManager()
   //m_files[0] = new std::vector<DiskPage *>();
   b->setSize(1);
   m_files[0].push_back(new DiskPage(NULL, b, "Student"));
+
+  b = new MemoryBlock(512);
+  
 }
 
 void FileManager::Initialize(const std::string & database)

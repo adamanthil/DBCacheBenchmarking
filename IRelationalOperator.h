@@ -20,8 +20,7 @@ class IRelationalOperator
 
   virtual void reset() = 0;
 
-  virtual bool isMatch(const Tuple & t);
-  virtual bool isMatch(const Tuple &, const Tuple &);
+  virtual bool satisfies();
   virtual void dump(std::ostream & strm,
 		    char fs = '|', char rs = '\n') {}
 

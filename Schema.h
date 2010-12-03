@@ -15,6 +15,8 @@ class Schema : public std::vector<Attribute *>
   void add(Attribute * attribute);
   size_t rsize() const;
   size_t nitems() const;
+  int offset(const Attribute * attribute) const;
+  int offset(int fpos);
 };
 
 #endif
