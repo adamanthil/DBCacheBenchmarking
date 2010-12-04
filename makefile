@@ -5,6 +5,7 @@ SRC = Application.cpp \
 	MemoryBlock.cpp \
 	FileDescriptor.cpp \
 	SequentialScan.cpp \
+	NestedBlockJoin.cpp \
 	BufferManager.cpp \
 	IRelationalOperator.cpp \
 	Schema.cpp \

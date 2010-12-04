@@ -2,11 +2,14 @@
 
 #include "BufferManager.h"
 
-NestedBlockJoin::NestedBlockJoin(IRelationalOperator & r1, IRelationalOperator & r2,
+NestedBlockJoin::NestedBlockJoin(const IRelationalOperator * r1, const IRelationalOperator * r2,
 		BooleanExpression & m_boolExp) {
 	m_block = BufferManager::getInstance()->allocate();
-	m_r1 = &r1;
-	m_r2 = &r2;
+	m_r1 = r1;
+	m_r2 = r2;
+	m_schema = schema;
+	m_clause = clause;
+	m_data = new byte[m_schema->rsize()];
 }
 
 NestedBlockJoin::~NestedBlockJoin() {
@@ -15,20 +18,33 @@ NestedBlockJoin::~NestedBlockJoin() {
     }
 }
 
+const Schema * SequentialScan::schema() const {
+  return m_schema;
+}
+
 void NestedBlockJoin::next(MemoryBlock & block) {
 	block.copy(*m_block);
 }
 
 bool NestedBlockJoin::moveNext() {
-	// If we reached the end of the outer loop, return false
-	if(!m_r1->moveNext()) {	
-		return false;
+	
+	int nrecords = 0;
+	int offset = 0;
+	int available = m_buffer->capacity();
+	
+	Tuple tuple;
+	byte buffer[256]; // TODO:
+	tuple.m_data = buffer;
+  	
+	m_buffer->clear();
+	
+	// Reset inner loop if we reached the end
+	if (!m_r2->moveNext()) {	
+		m_r2->reset();
 	}
+	
 	else {	// Otherwise, compare to next block of inner relation
-		// Reset inner loop if we reached the end
-		if (!m_r2->moveNext()) {	
-			m_r2->reset();
-		}
+
 		
 		// Match tuples
 		do {
@@ -57,6 +73,9 @@ bool NestedBlockJoin::moveNext() {
 	    m_inner_block = m_inner.next();
 	  }
     } */
+
+	m_buffer->setSize(nrecords);
+	return  nrecords > 0;
 }
 
 void NestedBlockJoin::reset() {
