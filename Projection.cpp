@@ -60,6 +60,7 @@ bool Projection::moveNext()
 	  // copy tuple to memory buffer.
 	  m_buffer[OUT]->put(m_tuple[OUT].m_data, offset, m_rsize);
 
+	  // book-keeping.
 	  offset += m_rsize;
 	  available -= m_rsize;
 	  nrecords++;

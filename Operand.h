@@ -77,7 +77,11 @@ int Operand<T>::compareTo(IOperand<T> & other)
     case CHAR:
       return value() - other.value();
     case STRING:
+      {
+      char * v1 = (char *)value();
+      char * v2 = (char *)other.value();
       return strcmp((char *)value(), (char *)other.value());
+      }
     case REAL:
       return 0;
     }

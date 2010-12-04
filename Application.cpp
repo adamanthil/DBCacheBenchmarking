@@ -24,7 +24,7 @@ typedef VariableOperand<const char *> StringVariable;
 
 void SelectAll(Schema & schema, Schema & p)
 {
-  IRelationalOperator * scan = new SequentialScan(std::string("Student"), 
+  IRelationalOperator * scan = new SequentialScan(std::string("Student.tab"), 
 						  &schema);
   IRelationalOperator * proj = new Projection(*scan, &p);
 
@@ -65,7 +65,7 @@ void SelectWhere(Schema & schema, int field)
   WhereClause clause(exp, &filter, vars);
 
   IRelationalOperator * scan = 
-    new SequentialScan(std::string("Student"), &schema, &clause);
+    new SequentialScan(std::string("Student.tab"), &schema, &clause);
   IRelationalOperator * proj = new Projection(*scan, &schema);
   proj->dump(std::cout, '|', '\n');
 
@@ -78,10 +78,11 @@ int main(int argc, char ** argv)
   Schema schema;
   Schema projection;
   
-  DataCreator::Create("config");
-  BufferManager::Initialize(512);
+  //DataCreator::Create("config");
   FileManager::Initialize("config");
 
+  
+  BufferManager::Initialize(512);
   schema.add(new Attribute(0, "id", "Student", 4, INTEGER));
   schema.add(new Attribute(1, "ssn", "Student", 10, STRING));
   schema.add(new Attribute(2, "fname", "Student", 20, STRING));
@@ -95,6 +96,7 @@ int main(int argc, char ** argv)
 
   SelectAll(schema, projection);
   SelectWhere(schema, 2);
+  
 }
 
 #endif

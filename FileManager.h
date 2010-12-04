@@ -23,10 +23,8 @@ class FileManager : public IFileManager
   private:
     int m_pageSize;
     std::vector<DiskPage *> m_files;
-    std::map<std::string,std::list<int> > m_namePagesMap;
+    std::map<std::string,std::list<int>* > m_namePagesMap;
     std::map<std::string,PageLayout> m_pageLayoutMap;
-
-    void loadBuffer(const std::string & formatFile);
 
 
   public:

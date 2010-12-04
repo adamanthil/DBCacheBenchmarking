@@ -7,10 +7,11 @@
 class FileDescriptor
 {
  private:
-  std::vector<DiskPage *> & m_pages;
+  std::vector<DiskPage *> * m_pages;
   int m_pid;
  public:
-  FileDescriptor(std::vector<DiskPage *> & pages); 
+  FileDescriptor(std::vector<DiskPage *> * pages); 
+  ~FileDescriptor();
   bool eof();
   void reset() { m_pid = 0; }
   void seek(int pid);
