@@ -6,6 +6,7 @@
 
 #include "PageLayout.h"
 #include "MemoryBlock.h"
+#include "Schema.h"
 
 class DiskPage
 {
@@ -19,7 +20,7 @@ class DiskPage
 
   size_t size() const;
   size_t capacity() const;
-  void get(int rid, const std::string & field, byte * buffer, size_t length) const;
+  void get(int rid, const Schema * fields, byte * buffer, size_t length);
   int put(int rid, const char * field, char * buffer, size_t length);
 };
 

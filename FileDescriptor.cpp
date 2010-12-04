@@ -14,3 +14,13 @@ bool FileDescriptor::eof()
 {
   return m_pages.size() <= m_pid;
 }
+
+int FileDescriptor::size()
+{
+  return m_pages.size();
+}
+
+void FileDescriptor::seek(int pid)
+{
+  m_pid = pid;
+}
