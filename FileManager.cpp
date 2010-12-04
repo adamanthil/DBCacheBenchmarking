@@ -78,6 +78,8 @@ void FileManager::loadBuffer(const std::string & formatFile)
     int* FtoPMap = new int[nFields];
     int* FtoBMap = new int[nFields];
     int* FtoLMap = new int[nFields];
+    int* PtoBMap = new int[nPartitions];
+    int* PtoLMap = new int[nPartitions];
     int fLoc = 0;
     for (int i = 0; i < nPartitions; i++)
     {
@@ -89,7 +91,9 @@ void FileManager::loadBuffer(const std::string & formatFile)
       int nFtoP = atoi(numFtoP.c_str());
       std::getline(pageFormat, numPBytes);
       int nPBytes = atoi(numPBytes.c_str());
-      currentStart += nPBytes;
+      currentStart += nPBytes*recordsPerPage;
+      PtoBMap[nBytes];
+      PtoLMap[currentStart];
       for (int j = 0; j < nFtoP; j++)
       {
 	std::string field;
@@ -104,7 +108,7 @@ void FileManager::loadBuffer(const std::string & formatFile)
         fLoc += fieldBytes;
       }
     }
-    PageLayout * a = new PageLayout(nPartitions, nFields, nBytesPerRecord, FtoPMap, FtoBMap, FtoLMap);
+    PageLayout * a = new PageLayout(nPartitions, nFields, nBytesPerRecord, FtoPMap, FtoBMap, FtoLMap, PtoLMap, PtoBMap);
     std::ifstream table(tableName.c_str(), std::ios::in | std::ios::binary);
     int nRecs = 0;
     std::list<int> pages;

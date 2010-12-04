@@ -1,13 +1,25 @@
 #include "PageLayout.h"
 
-PageLayout::PageLayout(int nPartitions, int nFields, int nBytesPerRecord, int* fToP, int* fToB, int* fToL)
+PageLayout::PageLayout(int nPartitions, int nFields, int nBytesPerRecord, int* fToP, int* fToB, int* fToL, int* pToB, int* pToL)
 {
   numPartitions = nPartitions;
   numFields = nFields;
   fieldToPartition = fToP;
   fieldToByte = fToB;
   fieldToLoc = fToL;
+  partitionToLoc = pToL;
+  partitionToByte = pToB;
   numBytesPerRecord = nBytesPerRecord;
+}
+
+int PageLayout::getPartitionStart(int partition) const;
+{
+  return partitionToLoc[partition];
+}
+
+int PageLayout::getPartitionBytes(int partition) const;
+{
+  return partitionToByte[partition];
 }
 
 int PageLayout::getNumPartitions() const

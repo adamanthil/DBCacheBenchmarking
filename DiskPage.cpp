@@ -25,7 +25,6 @@ size_t DiskPage::capacity() const
 void DiskPage::get(int rid, const Schema * fields, 
 		   byte * buffer, size_t length)
 {
-  int nBytesRec = m_layout->getNBytesPerRec();
   int numFields = fields->nitems();
   int totalNumBytes = fields->rsize();
   int currentLoc = 0;
@@ -34,7 +33,10 @@ void DiskPage::get(int rid, const Schema * fields,
     int fieldNum = fields->at(j)->id();
     int fieldSize = m_layout->getFieldsBytes(j);
     int locByte = m_layout->getFieldLoc(j);
-    int offset = nBytesRec*rid + locByte;
+    int partition = m_layout->getFieldPartition(j);
+    int partitionStart = m_layout->getPartitionStart(partition);
+    int partitionBytes = m_layout->getPartitionBytes(partition);
+    int offset = partitionStart + partitionBytes*rid + locByte;
     byte * bLoc = & buffer[currentLoc];
     m_block->get(bLoc, offset, fieldSize);
     currentLoc += fieldSize;
