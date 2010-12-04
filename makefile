@@ -13,7 +13,9 @@ SRC = Application.cpp \
 	Attribute.cpp \
 	BooleanExpression.cpp \
 	Operand.cpp \
-	Clause.cpp
+	Clause.cpp \
+	PageLayout.cpp \
+	DataCreator.cpp
 
 all:
 	g++ -g -O0 $(SRC) 

@@ -9,7 +9,6 @@
 class IClause
 {
  public:
-  virtual bool evaluate() = 0;
 };
 
 class WhereClause : public IClause
@@ -27,6 +26,11 @@ class WhereClause : public IClause
 
 class JoinClause : public IClause
 {
+ private:
+  enum { LEFT = 0, RIGHT = 1 };
+
+  BooleanExpression & m_expression;
+  Tuple m_Tuple[2];
  public:
   bool evaluate(const Tuple & t0, const Tuple & t1);
 };

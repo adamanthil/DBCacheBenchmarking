@@ -70,9 +70,6 @@ template<typename T>
 int Operand<T>::compareTo(IOperand<T> & other)
 {
 
-  std::cerr << "comparing " << value() << " to " << other.value() 
-	    << std::endl;
-
   switch (m_fieldType)
     {
     case INTEGER:
@@ -123,14 +120,6 @@ VariableOperand<T>::~VariableOperand()
 }
 
 /*
-
-template<> const char * VariableOperand<const char *>::value()
-{
-  //m_tuple->value((const char *)m_buffer, *m_attribute);
-  return (const char *)m_buffer;
-} 
-
-/ *
 template<typename T>
 T VariableOperand<T>::value()
 {

@@ -6,6 +6,11 @@ Attribute::Attribute(int id, std::string name, std::string table,
 {
 }
 
+int Attribute::id() const
+{
+  return m_id;
+}
+
 const std::string & Attribute::name() const 
 {
   return m_name;

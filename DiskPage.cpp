@@ -2,6 +2,7 @@
 #include <iostream>
 
 #include "DiskPage.h"
+#include "Attribute.h"
 
 DiskPage::DiskPage(const PageLayout * layout, MemoryBlock * block,
 		   const std::string & table) 
@@ -30,7 +31,7 @@ void DiskPage::get(int rid, const Schema * fields,
   int currentLoc = 0;
   for (int j; j < numFields; j++)
   {
-    int fieldNum = fields[j].id();
+    int fieldNum = fields->at(j)->id();
     int fieldSize = m_layout->getFieldsBytes(j);
     int locByte = m_layout->getFieldLoc(j);
     int offset = nBytesRec*rid + locByte;

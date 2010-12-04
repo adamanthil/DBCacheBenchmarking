@@ -7,7 +7,7 @@
 class DataCreator
 {
   public:
-  DataCreator(const std::string & config_file);
+  static void Create(const std::string & config_file);
 };
 
 #endif

@@ -11,7 +11,7 @@ void FileManager::Initialize(const std::string & config_file)
   }
 }
 
-FileManager * getInstance()
+FileManager * FileManager::getInstance()
 {
   if (!FileManager::instance)
   {

@@ -13,6 +13,9 @@
 #include "Operand.h"
 #include "BooleanExpression.h"
 
+#include "BufferManager.h"
+#include "DataCreator.h"
+
 typedef ConstantOperand<int> IntConstant;
 typedef ConstantOperand<const char *> StringConstant;
 
@@ -64,7 +67,7 @@ void SelectWhere(Schema & schema, int field)
   IRelationalOperator * scan = 
     new SequentialScan(std::string("Student"), &schema, &clause);
   IRelationalOperator * proj = new Projection(*scan, &schema);
-  proj->dump(std::cout);
+  proj->dump(std::cout, '|', '\n');
 
   delete scan;
   delete proj;
@@ -74,6 +77,10 @@ int main(int argc, char ** argv)
 {
   Schema schema;
   Schema projection;
+  
+  DataCreator::Create("config");
+  BufferManager::Initialize(512);
+  FileManager::Initialize("config");
 
   schema.add(new Attribute(0, "id", "Student", 4, INTEGER));
   schema.add(new Attribute(1, "ssn", "Student", 10, STRING));
@@ -81,9 +88,10 @@ int main(int argc, char ** argv)
   schema.add(new Attribute(3, "lname", "Student", 20, STRING));
   schema.add(new Attribute(4, "year", "Student", 2, STRING));
 
-  projection.add(schema.at(0));
   projection.add(schema.at(1));
   projection.add(schema.at(2));
+  projection.add(schema.at(3));
+  projection.add(schema.at(0));
 
   SelectAll(schema, projection);
   SelectWhere(schema, 2);

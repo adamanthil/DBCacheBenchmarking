@@ -16,7 +16,7 @@ void BufferManager::Initialize(size_t blockSize)
 {
   if (!BufferManager::instance)
     {
-      BufferManager::instance = new BufferManager();
+      BufferManager::instance = new BufferManager(blockSize);
     }
 }
 

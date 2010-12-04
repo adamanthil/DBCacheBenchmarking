@@ -23,6 +23,8 @@ private:
 public:
   Attribute(int id, std::string name, std::string table, 
 	    size_t size, field_type_t type);
+
+  int id() const;
   std::string qualifiedName() const;
   std::string table() const;
   const std::string & name() const;

@@ -39,15 +39,7 @@ const Schema * SequentialScan::schema() const
 
 byte * SequentialScan::extract(byte * buffer, const DiskPage * page, 
 			       int rid, const Schema * schema)
-{
-  int offset = 0;
-  for (int i = 0; i < schema->nitems(); i++)
-    {
-      const Attribute * attribute = schema->at(i);
-      page->get(rid, attribute->name(), buffer + offset, attribute->size());
-      offset += attribute->size();
-    }
-  
+{  
   return buffer;
 }
 
@@ -65,23 +57,23 @@ bool SequentialScan::moveNext()
   m_buffer->clear();
   while (!m_fd->eof() && available >= rsize)
     {
-
       DiskPage * page = BufferManager::getInstance()->read(m_fd);
       
       for (int rid = 0; rid < page->size() && available >= rsize; rid++)
 	{ 
-
 	  /* extract data to update variable expressions. */
 	  if (m_clause != NULL)
 	    {
-	      extract(buffer, page, rid, m_clause->schema()); 
+	      page->get(rid, m_clause->schema(), buffer, 
+			m_clause->schema()->rsize());
 	    }
 
 	  /* extract tuple */
 	  if (m_clause == NULL || m_clause->evaluate(tuple))
 	    {
-	      offset = m_buffer->put(extract(m_data, page, rid, m_schema), 
-				     offset, m_schema->rsize());
+	      memset(m_data, 0, rsize);
+	      page->get(rid, m_schema, m_data, rsize); 
+	      offset = m_buffer->put(m_data, offset, rsize);
 	      available -= rsize;
 	      nrecords++;
 	    }
