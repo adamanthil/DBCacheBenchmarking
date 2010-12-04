@@ -1,122 +1,146 @@
 #include <new>
 #include "FileManager.h"
 
-FileManager * FileManager::instance = NULL;
+FileManager* FileManager::instance = 0;
 
-struct Student
+void FileManager::Initialize(const std::string & config_file)
 {
-  int id;
-  char ssn[10 + 1];
-  char fname[20 + 1];
-  char lname[20 + 1];
-  char gender;
-  int birthdate;
-  char year[2 + 1];
-};
-
-struct Course
-{
-  int id;
-  char instructor[64];
-  char title[32];
-};
-
-struct Roster
-{
-  int sid;
-  int cid;
-};
-
-FileManager::FileManager()
-{
-
-  Student s[] = 
-    {
-      {0, "2389389392", 
-       "Greig               ", 
-       "Hazell              ", 'M', 0101, "SR"},
-      
-      {1, "3949493484",
-       "Andrew              ",
-       "Bender              ", 'M', 2001, "JR"},
-      {2, "3879093894",
-       "Emma                ",
-       "Turetsky            ", 'F', 2010, "SR"}
-    };
-  int offset = 0;
-
-  MemoryBlock * b = new MemoryBlock(sizeof(Student) * 2);
-
-  for (int i = 0; i < 2; i++)
-    {
-      offset = b->put((byte*)&s[i].id, offset, sizeof(s[i].id));
-      offset = b->put((byte*)&s[i].ssn, offset, sizeof(s[i].ssn) - 1);
-      offset = b->put((byte*)&s[i].fname, offset, sizeof(s[i].fname) - 1);
-      offset = b->put((byte*)&s[i].lname, offset, sizeof(s[i].lname) - 1);
-      offset = b->put((byte*)&s[i].gender, offset, sizeof(s[i].gender));
-      offset = b->put((byte*)&s[i].birthdate, offset, sizeof(s[i].birthdate));
-      offset = b->put((byte*)&s[i].year, offset, sizeof(s[i].year) - 1);
-    }
-  //m_files[0] = new std::vector<DiskPage *>();
-  b->setSize(2);
-  m_files[0].push_back(new DiskPage(NULL, b, "Student"));
-
-  b = new MemoryBlock(sizeof(Student) * 2);
-
-  offset=0;
-  for (int i = 2; i < sizeof(s) / sizeof(Student); i++)
-    {
-      offset = b->put((byte*)&s[i].id, offset, sizeof(s[i].id));
-      offset = b->put((byte*)&s[i].ssn, offset, sizeof(s[i].ssn) - 1);
-      offset = b->put((byte*)&s[i].fname, offset, sizeof(s[i].fname) - 1);
-      offset = b->put((byte*)&s[i].lname, offset, sizeof(s[i].lname) - 1);
-      offset = b->put((byte*)&s[i].gender, offset, sizeof(s[i].gender));
-      offset = b->put((byte*)&s[i].birthdate, offset, sizeof(s[i].birthdate));
-      offset = b->put((byte*)&s[i].year, offset, sizeof(s[i].year) - 1);
-    }
-  //m_files[0] = new std::vector<DiskPage *>();
-  b->setSize(1);
-  m_files[0].push_back(new DiskPage(NULL, b, "Student"));
-
-  b = new MemoryBlock(512);
-  
+  if (!FileManager::instance)
+  {
+    instance = new FileManager(config_file);
+  }
 }
 
-void FileManager::Initialize(const std::string & database)
+FileManager * getInstance()
 {
-  if (FileManager::instance == NULL)
-    {
-      FileManager::instance = new FileManager();
-    }
-}
-
-FileManager * FileManager::getInstance()
-{
-  if (FileManager::instance == NULL)
-    {
-      FileManager::Initialize("");
-    }
-
+  if (!FileManager::instance)
+  {
+    FileManager::instance = new FileManager("config");
+  }
   return FileManager::instance;
+}
+
+FileManager::FileManager(const std::string & config_file)
+{
+  loadBuffer(config_file);
 }
 
 FileDescriptor * FileManager::open(const std::string & filename)
 {
-  if (filename == "Student")
-    {
-      return new FileDescriptor(m_files[0]);
-    }
-  else if (filename == "Course")
-    {
-      return new FileDescriptor(m_files[1]);
-    }
-  else
-    {
-      return new FileDescriptor(m_files[2]);
-    }
+  std::list<int> pList = m_namePagesMap[filename];
+  std::list<int>::iterator it;
+  it = pList.begin();
+  std::vector<DiskPage *> tPages;
+  for (it; it != pList.end(); it++)
+  {
+    DiskPage* pg = m_files.at(*it);
+    tPages.push_back(pg);
+  }
+  FileDescriptor * descript = new FileDescriptor(tPages);
+  return descript;
 }
 
 void FileManager::close(FileDescriptor * fd)
 {
+  int a = 0;
   delete fd;
+}
+
+void FileManager::loadBuffer(const std::string & formatFile)
+{
+  std::ifstream pageFormat(formatFile.c_str());
+  std::string tableName;
+  int bufferLoc = 0;
+  std::string pgSize;
+  std::string bSize;
+  std::getline(pageFormat, pgSize,'|');
+  std::getline(pageFormat, bSize);
+  m_pageSize = atoi(pgSize.c_str());
+  int bufferSize = atoi(bSize.c_str());
+  while(!std::getline(pageFormat, tableName).eof())
+  {
+    std::string numPartitions;
+    std::string numFields;
+    std::string numRecords;
+    std::string numBytesPerRecord;
+    std::getline(pageFormat, numPartitions, '|');
+    std::getline(pageFormat, numFields, '|');
+    std::getline(pageFormat, numRecords, '|');
+    std::getline(pageFormat, numBytesPerRecord);
+    int nPartitions = atoi(numPartitions.c_str());
+    int nFields = atoi(numFields.c_str());
+    int nRecords = atoi(numRecords.c_str());
+    int nBytesPerRecord = atoi(numBytesPerRecord.c_str());
+    int recordsPerPage = m_pageSize/nBytesPerRecord;
+    int currentStart = 0;
+    int* startPositions = new int[nPartitions];
+    int* currentPositions = new int[nPartitions];
+    int* FtoPMap = new int[nFields];
+    int* FtoBMap = new int[nFields];
+    int* FtoLMap = new int[nFields];
+    int fLoc = 0;
+    for (int i = 0; i < nPartitions; i++)
+    {
+      startPositions[i] = currentStart;
+      currentPositions[i] = currentStart;
+      std::string numFtoP;
+      std::string numPBytes;
+      std::getline(pageFormat, numFtoP, '|');
+      int nFtoP = atoi(numFtoP.c_str());
+      std::getline(pageFormat, numPBytes);
+      int nPBytes = atoi(numPBytes.c_str());
+      currentStart += nPBytes;
+      for (int j = 0; j < nFtoP; j++)
+      {
+	std::string field;
+        std::string bytes;
+        std::getline(pageFormat,field, '|');
+        std::getline(pageFormat,bytes);
+        int fieldNum = atoi(field.c_str());
+        int fieldBytes = atoi(bytes.c_str());
+        FtoPMap[fieldNum] = i;
+        FtoBMap[fieldNum] = fieldBytes;
+        FtoLMap[fieldNum] = fLoc;
+        fLoc += fieldBytes;
+      }
+    }
+    PageLayout * a = new PageLayout(nPartitions, nFields, nBytesPerRecord, FtoPMap, FtoBMap, FtoLMap);
+    std::ifstream table(tableName.c_str(), std::ios::in | std::ios::binary);
+    int nRecs = 0;
+    std::list<int> pages;
+    MemoryBlock * data = new MemoryBlock(m_pageSize);
+    for (int k = 0; k < nRecords; k++)
+    {
+      if(nRecs == recordsPerPage)
+      {
+        pages.push_back(bufferLoc);
+        bufferLoc++;
+        nRecs = 0;
+        for(int l = 0; l < nPartitions; l++)
+	{
+           currentPositions[l] = startPositions[l];
+        }
+	DiskPage * dp = new DiskPage(a,data,tableName);
+	data = new MemoryBlock(m_pageSize);
+        m_files.push_back(dp);
+      }
+      for (int m = 0; m < nFields; m++)
+      {
+        int fB = FtoBMap[m];
+        int currentPartition = FtoPMap[m];
+        int writeLocation = currentPositions[currentPartition];
+        char * wrt;
+        table.read(wrt,fB);
+        data->put((byte*)wrt, writeLocation, fB);
+        currentPositions[currentPartition] = writeLocation + fB;
+      }
+      nRecs++;
+    }
+    pages.push_back(bufferLoc);
+    DiskPage *dp = new DiskPage(a, data, tableName);
+    bufferLoc++;
+    m_files.push_back(dp);
+    table.close();
+  }
+  pageFormat.close();
 }
