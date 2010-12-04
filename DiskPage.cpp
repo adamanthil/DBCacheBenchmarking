@@ -31,9 +31,9 @@ void DiskPage::get(int rid, const Schema * fields,
   for (int j=0; j < numFields; j++)
   {
     int fieldNum = fields->at(j)->id();
-    int fieldSize = m_layout->getFieldsBytes(j);
-    int locByte = m_layout->getFieldLoc(j);
-    int partition = m_layout->getFieldsPartition(j);
+    int fieldSize = m_layout->getFieldsBytes(fieldNum);
+    int locByte = m_layout->getFieldLoc(fieldNum);
+    int partition = m_layout->getFieldsPartition(fieldNum);
     int partitionStart = m_layout->getPartitionStart(partition);
     int partitionBytes = m_layout->getPartitionBytes(partition);
     int offset = partitionStart + partitionBytes*rid + locByte;
