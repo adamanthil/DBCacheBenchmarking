@@ -4,7 +4,7 @@
 #include "BufferManager.h"
 #include "Tuple.h"
 
-Projection::Projection(IRelationalOperator & child, Schema * schema) :
+Projection::Projection(IRelationalOperator & child, const Schema * schema) :
   m_child(child), m_consumed(true), m_next(0)
 {
   m_rsize = schema->rsize();

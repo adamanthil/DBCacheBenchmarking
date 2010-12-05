@@ -18,8 +18,7 @@ SRC = Application.cpp \
 	Operand.cpp \
 	Clause.cpp \
 	PageLayout.cpp \
-	DataCreator.cpp \
-	Table.cpp
+	DataCreator.cpp 
 
 all:
 	g++ -g -O0 $(SRC) 

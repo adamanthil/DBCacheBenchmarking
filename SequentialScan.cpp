@@ -6,7 +6,8 @@
 #include "FileManager.h"
 #include "BufferManager.h"
 
-SequentialScan::SequentialScan(const std::string & filename, Schema * schema)
+SequentialScan::SequentialScan(const std::string & filename, 
+			       const Schema * schema)
 {
   m_fd = FileManager::getInstance()->open(filename);
   m_buffer = BufferManager::getInstance()->allocate();
@@ -15,7 +16,8 @@ SequentialScan::SequentialScan(const std::string & filename, Schema * schema)
   m_data = new byte[m_schema->rsize()];
 }
 
-SequentialScan::SequentialScan(const std::string & filename, Schema * schema,
+SequentialScan::SequentialScan(const std::string & filename, 
+			       const Schema * schema,
 			       WhereClause * clause)
 {
   m_fd = FileManager::getInstance()->open(filename);

@@ -46,7 +46,6 @@ void DataCreator::CreateDB(const std::string & configFile, bool makeHuman)
 	    {
 	      int field = k;
 	      memcpy(record_buf + (nBytes*k)+s,&field,sizeof(field));
-	      std::cerr << field << "|" << (nBytes*k) + s << "\n";
 	    }
           }
           else if(iType.compare("range") == 0)
@@ -65,7 +64,6 @@ void DataCreator::CreateDB(const std::string & configFile, bool makeHuman)
 	    {
 	      int field = rand() % diff + lB;
               memcpy(record_buf + (nBytes*k)+s, &field, sizeof(field));
-              std::cerr << field << "|" << (nBytes*k)+s << "\n";
 	    }
           }
           else
@@ -77,7 +75,6 @@ void DataCreator::CreateDB(const std::string & configFile, bool makeHuman)
 	   {
 	     int field = rand();
              memcpy(record_buf + (nBytes*k)+s, &field, sizeof(field));
-	     std::cerr << field << "|" << (nBytes*k)+s << "\n";
 	   }
           }
         }
@@ -100,7 +97,6 @@ void DataCreator::CreateDB(const std::string & configFile, bool makeHuman)
             }
             memcpy(record_buf + (nBytes*k)+s, field, nChar);
 	    field[nChar] = 0;
-	    std::cerr << field << "|" << (nBytes*k)+s << "\n";
 	    std::pair<bool,int> ty(false,nChar);
 	    //ty = std::make_pair(false,nChar);
             types->push_back(ty);

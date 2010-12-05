@@ -2,6 +2,7 @@
 #define TABLE_H_
 
 #include "Schema.h"
+
 class Table
 {
  private:
@@ -11,6 +12,7 @@ class Table
   Schema * m_schema;
  public:
   Table(int id, std::string name, std::string path, Schema * schema);
+  ~Table();
   const Schema * schema() const;
   const std::string & name() const;
   const std::string & path() const;
