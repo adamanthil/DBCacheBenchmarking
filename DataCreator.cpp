@@ -89,6 +89,47 @@ void DataCreator::CreateDB(const std::string & configFile, bool makeHuman)
 	   }
           }
         }
+        else if (fType.compare("fk") == 0)
+        {
+	    std::pair<bool,int> ty(true,4);
+	    //ty = std::make_pair(true,4);
+            types->push_back(ty);
+
+            std::string lower;
+            std::string upper;
+            std::string nLower;
+            std::string nUpper;
+            std::getline(dataFormat,lower,'|');
+            std::getline(dataFormat,upper,'|');
+            std::getline(dataFormat,nLower,'|');
+            std::getline(dataFormat,nUpper,'|');
+            std::string start;
+            std::getline(dataFormat,start);
+            int s = atoi(start.c_str());
+            int lB = atoi(lower.c_str());
+            int uB = atoi(upper.c_str());
+            int nLB = atoi(nLower.c_str());
+            int nUB = atoi(nUpper.c_str());
+            int diff = uB - lB + 1;
+           std::vector<int> * fKey = new std::vector<int>(); 
+           for (int k = 0; k < nRecords; k++)
+            {
+              int field = rand() % diff + lB;
+              if ((field < nUB) && (field > nLB))
+              {
+                field = rand() % (1+lB-nLB) + lB;
+              }
+              fKey->push_back(field);
+            }
+            std::vector<int>::iterator it;
+            sort (fKey->begin(), fKey->end());
+	    std::cerr << fKey->size() << "\n";
+            for (int l = 0; l < nRecords; l++)
+            { 
+              int a = fKey->at(l);
+              memcpy(record_buf + (nBytes*l)+s, &a, sizeof(a));
+            }
+        }
         else
         {
           std::string numChar;
