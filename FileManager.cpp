@@ -117,7 +117,7 @@ void FileManager::loadData(const std::string & formatFile)
     MemoryBlock * data = new MemoryBlock(m_pageSize);
 
     
-    for (int k = 0; k < nRecords; k++)
+    for (int k = 0; !table.eof(); k++)
     {
       if(nRecs == recordsPerPage)
       {
@@ -197,7 +197,6 @@ void FileManager::loadSchema(const std::string & filename)
   while (!schema.eof() && (s = buffer).find("<table") != std::string::npos)
   {
     sch = new Schema();
-    s = buffer;
     char value[256];
     int tid = atoi(get_value(s, "id",value,sizeof(value)));    
     std::string tname = get_value(s, "name",value,sizeof(value));
@@ -222,6 +221,8 @@ void FileManager::loadSchema(const std::string & filename)
     Table * tbl = new Table(tid, tname, path, sch);
     //std::map<std::string,Table>
     m_schemaMap[tname] = tbl;
+
+    schema.getline(buffer, sizeof(buffer)); // read 
   }
 
   schema.close();
