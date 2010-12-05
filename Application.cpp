@@ -32,6 +32,19 @@ void SelectAll(Table & table, const Schema & schema, const Schema & projection)
   delete proj;
 }
 
+void CartesianJoin(Table & table1, Table & table2) {
+	IRelationalOperator * scan1 = new SequentialScan(table1.path(), table1.schema());
+	IRelationalOperator * scan2 = new SequentialScan(table2.path(), table2.schema());
+	IRelationalOperator * loopJoin = new NestedBlockJoin(scan1, scan2, NULL);
+	IRelationalOperator * projection = new Projection(*loopJoin, loopJoin->schema());
+	projection->dump(std::cout);
+	
+	delete projection;
+	delete loopJoin;
+	delete scan2;
+	delete scan1;
+}
+
 void SelectWhere(Schema & schema, int field)
 {
   Schema filter;
@@ -78,15 +91,17 @@ int main(int argc, char ** argv)
   Schema schema;
   Schema projection;
   
-  DataCreator::CreateDB("createdb", false);
+  DataCreator::CreateDB("createdb", true);
 
   BufferManager::Initialize(64);
   FileManager::Initialize("config", "db.xml");
 
   FileManager * fm = FileManager::getInstance();
-  Table * t = fm->getTable("test");
+  Table * t = fm->getTable("test1");
   
   SelectAll(*t, *t->schema(), *t->schema());
+
+  CartesianJoin(*t,*t);
   //SelectWhere(schema, 2);
   
 }

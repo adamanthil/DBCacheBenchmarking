@@ -1,17 +1,31 @@
 #include "JoinOperator.h"
 
-Schema * JoinOperator::concatSchema(const Schema * s1, const Schema * s2) {
-	Schema * schema = new Schema();
+void JoinOperator::concatSchema(const Schema * s1, const Schema * s2) {
 	
 	// Add attributes of 1st relation
 	for(int i = 0; i < s1->size(); i++) {
-		schema->add(s1->at(i));
+		m_schema.add(s1->at(i));
 	}
 	
 	// Add attributes of 2nd relation
 	for(int i = 0; i < s2->size(); i++) {
-		schema->add(s2->at(i));
+		m_schema.add(s2->at(i));
 	}
 	
-	return schema;
+}
+
+const Schema * JoinOperator::schema() const {
+	return &m_schema;
+}
+
+JoinOperator::JoinOperator(IRelationalOperator * r1, IRelationalOperator * r2,
+		JoinClause * clause) {
+	m_child[0] = r1;
+	m_child[2] = r2;
+	m_clause = clause;
+	concatSchema(r1->schema(), r2->schema());
+}
+
+JoinOperator::~JoinOperator() {
+	
 }
