@@ -41,6 +41,8 @@ class ConstantOperand : public Operand<T>
 class IVariableOperand
 {
  public: 
+  virtual void attribute(const Attribute * attribute) = 0;
+  virtual const Attribute * attribute() const = 0;
   virtual void data(const Tuple * t) = 0;
 };
 
@@ -57,6 +59,9 @@ class VariableOperand : public Operand<T>, public IVariableOperand
 		  field_type_t type);
   ~VariableOperand();
   virtual T value();
+  virtual const Attribute * attribute() const { return m_attribute; }
+  virtual void attribute(const Attribute * attribute) 
+  { m_attribute = attribute; }
   virtual void data(const Tuple * t);
 };
 

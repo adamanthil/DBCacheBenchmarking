@@ -79,10 +79,10 @@ void SelectWhere(Table & tbl)
       columns.push_back(tbl.schema()->at(i));
     }
 
-  IntConstant l(30, INTEGER);
+  IntConstant l(39, INTEGER);
   IntVariable r(tbl.schema()->at(1), INTEGER);
 
-  BooleanFactor<int> f(r, GE, l);
+  BooleanFactor<int> f(r, EQ, l);
   BooleanTerm t;
   BooleanExpression exp(1);
 
