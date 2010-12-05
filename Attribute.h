@@ -30,6 +30,8 @@ public:
   const std::string & name() const;
   size_t size() const;
   field_type_t type() const;
+
+  static field_type_t type(const std::string &);
 };
 
 #endif

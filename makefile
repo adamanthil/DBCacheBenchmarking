@@ -4,6 +4,7 @@ SRC = Application.cpp \
 	DiskPage.cpp \
 	MemoryBlock.cpp \
 	FileDescriptor.cpp \
+	Table.cpp \
 	SequentialScan.cpp \
 	JoinOperator.cpp \
 	NestedBlockJoin.cpp \

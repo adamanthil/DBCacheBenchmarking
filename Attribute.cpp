@@ -6,6 +6,30 @@ Attribute::Attribute(int id, std::string name, std::string table,
 {
 }
 
+field_type_t Attribute::type(const std::string & t)
+{
+  if (t == "BIT")
+  {
+    return BIT;
+  }
+  else if (t == "INTEGER")
+  {
+    return INTEGER;
+  }
+  else if (t == "REAL")
+  {
+    return REAL;
+  }
+  else if (t == "CHAR")
+  {
+    return CHAR;
+  }
+  else
+  {
+    return STRING;
+  }
+}
+
 int Attribute::id() const
 {
   return m_id;
