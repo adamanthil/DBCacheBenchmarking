@@ -27,5 +27,7 @@ JoinOperator::JoinOperator(IRelationalOperator * r1, IRelationalOperator * r2,
 }
 
 JoinOperator::~JoinOperator() {
-	
+	// IRelationalOperator is responsible for deleting children
+	delete m_child[LEFT];
+	delete m_child[RIGHT];
 }

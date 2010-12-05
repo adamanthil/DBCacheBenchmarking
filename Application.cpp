@@ -110,7 +110,7 @@ int main(int argc, char ** argv)
   
   DataCreator::CreateDB("createdb", true);
 
-  BufferManager::Initialize(64);
+  BufferManager::Initialize();
   FileManager::Initialize("config", "db.xml");
 
   FileManager * fm = FileManager::getInstance();
