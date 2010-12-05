@@ -14,5 +14,6 @@
         <attribute id="1" name="tNum" type="INTEGER" length="4" />
         <attribute id="2" name="course" type="STRING" length="6" />
       </schema>
+    </table>
   </tables>
 </database>

@@ -27,7 +27,7 @@ void SelectAll(Table & table, const Schema & schema)
 
   columns.push_back(schema[0]);
   columns.push_back(schema[1]);
-  columns.push_back(schema[3]);
+  //columns.push_back(schema[3]);
 
   IRelationalOperator * scan = new SequentialScan(table.path(), &schema);
   IRelationalOperator * proj = new Projection(scan, columns);
@@ -55,15 +55,24 @@ void CartesianJoin(Table & table1, Table & table2)
 
 void EquiJoin(Table & t1, Table & t2)
 {
-  /*
+
+  ProjectionList columns;
+
   IRelationalOperator * scan1 = new SequentialScan(t1.path(), t1.schema());
   IRelationalOperator * scan2 = new SequentialScan(t2.path(), t2.schema());
   IRelationalOperator * join = new MergeJoin(scan1, scan2);
-  IRelationalOperator * projection = new Projection(join, join->schema());
+
+  for (int i = 0; i < join->schema()->nitems(); i++)
+    {
+      columns.push_back(join->schema()->at(i));
+    }
+  
+
+  IRelationalOperator * projection = new Projection(join, columns);
   projection->dump(std::cout);
 
   delete projection;
-  */
+  
 }
 
 void SelectWhere(Table & tbl)
@@ -73,24 +82,34 @@ void SelectWhere(Table & tbl)
   SelectionList filter;
 
   filter.push_back(tbl.schema()->at(1));
+  filter.push_back(tbl.schema()->at(0));
 
   for (int i = 0; i < tbl.schema()->nitems(); i++)
     {
       columns.push_back(tbl.schema()->at(i));
     }
 
-  IntConstant l(39, INTEGER);
+  IntConstant l(25, INTEGER);
   IntVariable r(tbl.schema()->at(1), INTEGER);
 
-  BooleanFactor<int> f(r, EQ, l);
+  IntConstant l1(5, INTEGER);
+  IntVariable r1(tbl.schema()->at(0), INTEGER);
+
+  BooleanFactor<int> f(r, GE, l);
+  BooleanFactor<int> f1(r1, LE, l1);
   BooleanTerm t;
-  BooleanExpression exp(1);
+  BooleanTerm t1;
+
+  BooleanExpression exp(2);
 
   t.factor(&f);
+  t.factor(&f1);
   exp.term(0, &t);
+  //exp.term(1, &t1);
 
   std::vector<IVariableOperand *> vars;
   vars.push_back(&r);
+  vars.push_back(&r1);
 
   WhereClause clause(exp, filter, vars);
 
@@ -115,12 +134,14 @@ int main(int argc, char ** argv)
 
   FileManager * fm = FileManager::getInstance();
   Table * t = fm->getTable("test1");
+  Table * t0 = fm->getTable("test2");
   
   SelectAll(*t, *t->schema());
-  SelectWhere(*t);
+  SelectAll(*t0, *t0->schema());
+  //  SelectWhere(*t);
 
   //CartesianJoin(*t,*t);
-  //EquiJoin(*t, *t);
+  EquiJoin(*t, *t0);
 }
 
 #endif
