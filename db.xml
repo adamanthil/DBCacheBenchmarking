@@ -1,0 +1,12 @@
+<database>
+  <tables>
+    <table id="0" name="test" path="testTable.tab">
+      <schema>
+        <attribute id="0" name="id" type="INTEGER" length="4" />
+	<attribute id="1" name="age" type="INTEGER" length="4" />
+	<attribute id="2" name="sid" type="INTEGER" length="4" />
+	<attribute id="3" name="lName" type="STRING" length="8" />
+      </schema>
+    </table>
+  </tables>
+</database>

@@ -1,0 +1,6 @@
+testTable.tab
+4|25|20
+int|incr|0
+int|range|10|40|4
+int|random|8
+string|8|12
