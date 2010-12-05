@@ -3,7 +3,7 @@
 #include "BufferManager.h"
 
 NestedBlockJoin::NestedBlockJoin(IRelationalOperator * r1, IRelationalOperator * r2,
-		WhereClause * clause) {
+		JoinClause * clause) {
 	m_buffer = BufferManager::getInstance()->allocate();
 	m_r1 = r1;
 	m_r2 = r2;
@@ -43,7 +43,7 @@ void NestedBlockJoin::nextRightTuple(Tuple * tuple) {
 }*/
 
 bool NestedBlockJoin::moveNext() {
-	/*
+
 	int nrecords = 0;
 	int offset = 0;
 	int available = m_buffer->capacity();
@@ -69,7 +69,6 @@ bool NestedBlockJoin::moveNext() {
 	else {	// Otherwise, get next inner loop block
 		m_rightBlock = m_r2->next();
 	}
-*/
   /*
 		while (m_buffer.full()== false && m_outer.moveNext()) {
       		MemoryBlock b = m_outer.next();

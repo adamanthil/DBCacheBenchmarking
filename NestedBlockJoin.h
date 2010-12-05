@@ -27,7 +27,7 @@ private:
 	
 public:
 	NestedBlockJoin(IRelationalOperator * r1, IRelationalOperator * r2,
-			WhereClause * m_clause);
+			JoinClause * m_clause);
 	~NestedBlockJoin();
 	virtual const Schema * schema() const;
 	virtual bool moveNext();
