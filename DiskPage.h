@@ -21,6 +21,7 @@ class DiskPage
   size_t size() const;
   size_t capacity() const;
   void get(int rid, const Schema * fields, byte * buffer, size_t length);
+  void get(int rid, const std::vector<Attribute *> fields, byte * buffer, size_t length);
   int put(int rid, const char * field, char * buffer, size_t length);
 };
 
