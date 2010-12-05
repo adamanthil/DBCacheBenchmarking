@@ -2,57 +2,74 @@
 
 #include "BufferManager.h"
 
-NestedBlockJoin::NestedBlockJoin(const IRelationalOperator * r1, const IRelationalOperator * r2,
-		BooleanExpression & m_boolExp) {
-	m_block = BufferManager::getInstance()->allocate();
+NestedBlockJoin::NestedBlockJoin(IRelationalOperator * r1, IRelationalOperator * r2,
+		WhereClause * clause) {
+	m_buffer = BufferManager::getInstance()->allocate();
 	m_r1 = r1;
 	m_r2 = r2;
-	m_schema = schema;
 	m_clause = clause;
+	m_schema = concatSchema(r1->schema(), r2->schema());
 	m_data = new byte[m_schema->rsize()];
+	m_leftBlockRid = 0;
+	m_rightBlockRid = 0;
 }
 
 NestedBlockJoin::~NestedBlockJoin() {
-	if (m_block != NULL) {
-		BufferManager::getInstance()->deallocate(m_block);
+	if (m_buffer != NULL) {
+		BufferManager::getInstance()->deallocate(m_buffer);
     }
+
+	delete[] m_data;
+	delete m_schema;
 }
 
-const Schema * SequentialScan::schema() const {
+const Schema * NestedBlockJoin::schema() const {
   return m_schema;
 }
 
 void NestedBlockJoin::next(MemoryBlock & block) {
-	block.copy(*m_block);
+	block.copy(*m_buffer);
+}
+/*
+void NestedBlockJoin::nextLeftTuple(Tuple * tuple) {
+	
 }
 
-bool NestedBlockJoin::moveNext() {
+void NestedBlockJoin::nextRightTuple(Tuple * tuple) {
+	if(m_rightBlockRid < m_rightBlock->size()) {
+		
+	}
 	
+}*/
+
+bool NestedBlockJoin::moveNext() {
+	/*
 	int nrecords = 0;
 	int offset = 0;
 	int available = m_buffer->capacity();
 	
 	Tuple tuple;
-	byte buffer[256]; // TODO:
+	byte buffer[512]; // TODO: should be dynamically allocated
 	tuple.m_data = buffer;
   	
 	m_buffer->clear();
 	
-	// Reset inner loop if we reached the end
+	
+	
+	// Reset inner loop & increment outer loop if we reached the end
 	if (!m_r2->moveNext()) {	
 		m_r2->reset();
+		m_rightBlock = m_r2->next();
+		m_rightBlockRid = 0;
+		
+		m_r1->moveNext();
+		m_leftBlock = m_r1->next();
 	}
 	
-	else {	// Otherwise, compare to next block of inner relation
-
-		
-		// Match tuples
-		do {
-			
-		} while(m_r2->moveNext());
-		
+	else {	// Otherwise, get next inner loop block
+		m_rightBlock = m_r2->next();
 	}
-
+*/
   /*
 		while (m_buffer.full()== false && m_outer.moveNext()) {
       		MemoryBlock b = m_outer.next();
@@ -74,8 +91,8 @@ bool NestedBlockJoin::moveNext() {
 	  }
     } */
 
-	m_buffer->setSize(nrecords);
-	return  nrecords > 0;
+	//m_buffer->setSize(nrecords);
+	//return  nrecords > 0;
 }
 
 void NestedBlockJoin::reset() {
