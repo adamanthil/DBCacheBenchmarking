@@ -52,17 +52,27 @@ void DataCreator::CreateDB(const std::string & configFile, bool makeHuman)
           {
             std::string lower;
             std::string upper;
+            std::string nLower;
+            std::string nUpper;
             std::getline(dataFormat,lower,'|');
             std::getline(dataFormat,upper,'|');
+            std::getline(dataFormat,nLower,'|');
+            std::getline(dataFormat,nUpper,'|');
 	    std::string start;
 	    std::getline(dataFormat,start);
             int s = atoi(start.c_str());
             int lB = atoi(lower.c_str());
             int uB = atoi(upper.c_str());
+            int nLB = atoi(nLower.c_str());
+            int nUB = atoi(nUpper.c_str());
             int diff = uB - lB + 1;
 	    for (int k = 0; k < nRecords; k++)
 	    {
 	      int field = rand() % diff + lB;
+	      if ((field < nUB) && (field > nLB))
+	      {
+	        field = rand() % (1+lB-nLB) + lB;
+	      }
               memcpy(record_buf + (nBytes*k)+s, &field, sizeof(field));
 	    }
           }

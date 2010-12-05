@@ -1,6 +1,10 @@
-testTable.tab
+testTable1.tab
 4|25|20
 int|incr|0
-int|range|10|40|4
+int|range|10|40|0|0|4
 int|random|8
 string|8|12
+3|95|14
+int|incr|0
+int|range|0|25|11|16|4
+string|6|8
