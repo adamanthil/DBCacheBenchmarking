@@ -31,10 +31,13 @@ class JoinClause
 
   BooleanExpression & m_expression;
   Tuple m_tuple[2];
+  SelectionList m_items[2];
  public:
-  JoinClause(BooleanExpression & exp, const Schema * schema[],
+  JoinClause(BooleanExpression & exp, SelectionList items[],
 	std::vector<IVariableOperand *> variables[]);
+  ~JoinClause();
   bool evaluate(const Tuple & t0, const Tuple & t1);
+  const SelectionList & filter(int branch) const;
   const Schema * schema(int branch) const;
 };
 

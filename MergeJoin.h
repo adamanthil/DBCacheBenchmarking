@@ -8,6 +8,8 @@
 
 //typedef std::vector<const Attribute *> SortKey;
 
+typedef std::vector<const Attribute *> ComparisonList;
+
 /**
  * equi-join operator on pre-sorted data.
  */

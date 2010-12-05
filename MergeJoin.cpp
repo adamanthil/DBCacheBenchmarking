@@ -48,7 +48,18 @@ MergeJoin::~MergeJoin()
 
 int MergeJoin::compare(const Tuple & t0, const Tuple & t1)
 {
-  return 0; // TODO: 
+  const Attribute * l = t0.schema()->at(0);
+  const Attribute * r = t1.schema()->at(0);
+
+  int a = 0;
+  int b = 0;
+
+  t0.value(&a, *l);
+  t1.value(&b, *r);
+
+  //  std::cerr << "values = " << a << ", " << b << std::endl;
+  
+  return a - b;
 }
 
 bool MergeJoin::hasData(int branch)
@@ -83,10 +94,11 @@ void MergeJoin::concatenate(Tuple & dst, const Tuple & s, const Tuple & t)
   memcpy(dst.m_data, s.m_data, s.schema()->rsize());
   memcpy(dst.m_data + s.schema()->rsize(), t.m_data, t.schema()->rsize());
     
+  /*
   std::cerr << "concat("; s.dump(std::cerr, '|', ';'); t.dump(std::cerr, '|', ')');
   std::cerr << "=";
   dst.schema(&m_schema); dst.dump(std::cerr);
-  
+  */
 }
 
 bool MergeJoin::get_tuple(int branch)
@@ -195,6 +207,7 @@ int MergeJoin::merge(size_t available)
 	  std::for_each(m_merge_stack.begin(), m_merge_stack.end(), free); // TODO: can i do this
 	  m_merge_stack.clear();
 	  m_merge_with = 0;
+	  break;
 	}
     }
   m_buffer->setSize(nrecords + m_buffer->getSize());
