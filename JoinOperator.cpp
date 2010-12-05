@@ -9,7 +9,7 @@ void JoinOperator::concatSchema(const Schema * s1, const Schema * s2) {
 	
 	// Add attributes of 2nd relation
 	for(int i = 0; i < s2->size(); i++) {
-		m_schema->add(s2->at(i));
+		m_schema.add(s2->at(i));
 	}
 	
 }
@@ -19,7 +19,13 @@ const Schema * JoinOperator::schema() const {
 }
 
 JoinOperator::JoinOperator(IRelationalOperator * r1, IRelationalOperator * r2,
-		JoinClause * m_clause) {
+		JoinClause * clause) {
+	m_child[0] = r1;
+	m_child[2] = r2;
+	m_clause = clause;
 	concatSchema(r1->schema(), r2->schema());
-			
+}
+
+JoinOperator::~JoinOperator() {
+	
 }
