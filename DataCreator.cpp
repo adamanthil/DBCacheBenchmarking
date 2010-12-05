@@ -11,9 +11,10 @@ void DataCreator::Create(const std::string & configFile)
 void DataCreator::CreateDB(const std::string & configFile, bool makeHuman)
 {
   std::ifstream dataFormat(configFile.c_str());
-  std::string tableName;
-  while(!std::getline(dataFormat,tableName).eof())
+  std::string tabName;
+  while(!std::getline(dataFormat,tabName).eof())
   {
+    std::tableName = "/Data/" + tabName;
     std::ofstream oFile (tableName.c_str(), std::ios::out | std::ios::binary);
     std::string numFields;
     std::string numRecords;
