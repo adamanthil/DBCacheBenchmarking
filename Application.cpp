@@ -7,13 +7,14 @@
 
 #include "Schema.h"
 #include "FileManager.h"
+#include "BufferManager.h"
 #include "Attribute.h"
 #include "Operators.h"
 
 #include "Operand.h"
 #include "BooleanExpression.h"
+#include "Table.h"
 
-#include "BufferManager.h"
 #include "DataCreator.h"
 
 typedef ConstantOperand<int> IntConstant;
@@ -22,11 +23,10 @@ typedef ConstantOperand<const char *> StringConstant;
 typedef VariableOperand<int> IntVariable;
 typedef VariableOperand<const char *> StringVariable;
 
-void SelectAll(Schema & schema, Schema & p)
+void SelectAll(Table & table, Schema & schema, Schema & projection)
 {
-  IRelationalOperator * scan = new SequentialScan(std::string("Student.tab"), 
-						  &schema);
-  IRelationalOperator * proj = new Projection(*scan, &p);
+  IRelationalOperator * scan = new SequentialScan(table.path(), &schema);
+  IRelationalOperator * proj = new Projection(*scan, &projection);
 
   proj->dump(std::cout);
 
@@ -38,17 +38,17 @@ void SelectWhere(Schema & schema, int field)
 {
   Schema filter;
   
-  IntConstant l0(1, INTEGER);
-  IntVariable r0(schema.at(0), INTEGER);
+  IntConstant l0(2, INTEGER);
+  IntVariable r0(schema["id"], INTEGER);
 
   StringConstant l1("Greig               ", STRING);
-  StringVariable r1(schema.at(2), STRING);
+  StringVariable r1(schema["fname"], STRING);
 
-  BooleanFactor<int> f0(r0, GT, l0);
+  BooleanFactor<int> f0(r0, EQ, l0);
   BooleanFactor<const char *> f1(l1, EQ, r1);
   BooleanTerm t0;
   BooleanTerm t1;
-  BooleanExpression exp(2);
+  BooleanExpression exp(1);
   std::vector<IVariableOperand *> vars;
 
   filter.add(schema.at(0));
@@ -56,6 +56,7 @@ void SelectWhere(Schema & schema, int field)
 
   t1.factor(&f1);
   t0.factor(&f0);
+
   exp.term(0, &t1);
   exp.term(1, &t0);
 
@@ -65,12 +66,13 @@ void SelectWhere(Schema & schema, int field)
   WhereClause clause(exp, &filter, vars);
 
   IRelationalOperator * scan = 
-    new SequentialScan(std::string("Student.tab"), &schema, &clause);
+    new SequentialScan(std::string("Student.dat"), &schema, &clause);
   IRelationalOperator * proj = new Projection(*scan, &schema);
   proj->dump(std::cout, '|', '\n');
 
   delete scan;
   delete proj;
+  
 }
 
 int main(int argc, char ** argv)
@@ -82,19 +84,26 @@ int main(int argc, char ** argv)
   FileManager::Initialize("config");
 
   
-  BufferManager::Initialize(512);
+  Table * t = fm->table("student");
+  schema.add(t->schema(0));
+  
+  /*
+  / * Student Table Schema * /
   schema.add(new Attribute(0, "id", "Student", 4, INTEGER));
   schema.add(new Attribute(1, "ssn", "Student", 10, STRING));
   schema.add(new Attribute(2, "fname", "Student", 20, STRING));
   schema.add(new Attribute(3, "lname", "Student", 20, STRING));
   schema.add(new Attribute(4, "year", "Student", 2, STRING));
+  Table student(0, std::string("student"), std::string("Student.tab"), 
+		&schema);
+  */
+  BufferManager::Initialize(512);
 
-  projection.add(schema.at(1));
-  projection.add(schema.at(2));
-  projection.add(schema.at(3));
-  projection.add(schema.at(0));
+  projection.add(schema["ssn"]);
+  projection.add(schema["fname"]);
+  projection.add(schema["lname"]);
 
-  SelectAll(schema, projection);
+  SelectAll(student, schema, projection);
   SelectWhere(schema, 2);
   
 }
