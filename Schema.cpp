@@ -14,11 +14,10 @@ Schema::~Schema()
 
 void Schema::add(const Attribute * a)
 {
-  Attribute * attribute = new Attribute(size(), 
-				a->name(),
-				a->table(),
-				a->size(),
-				a->type());
+  Attribute * attribute = 
+    new Attribute(a->id(), size(), a->name(), a->table(),
+		  a->size(), a->type());
+
   push_back(attribute);
   m_offset.push_back(m_size);
   m_size += attribute->size();
@@ -26,18 +25,15 @@ void Schema::add(const Attribute * a)
 
 int Schema::offset(const Attribute * attribute) const
 {
+  return m_offset[attribute->position()];
 
-  return m_offset[attribute->id()];
   /*
-  int offset = 0;
   for (int i = 0; i < size(); i++)
     {
       const Attribute * a = at(i);
-      if (a == attribute)
+      if (a->id() == attribute->id())
 	{
-	  return offset;
 	}
-      offset += a->size();
     }
   
   return -1;

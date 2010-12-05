@@ -43,7 +43,7 @@ void DiskPage::get(int rid, const Schema * fields,
   }
 }
 
-void DiskPage::get(int rid, const std::vector<Attribute *> fields, byte * buffer, size_t length)
+void DiskPage::get(int rid, const std::vector<Attribute *> & fields, byte * buffer, size_t length)
 {
     int numFields = fields.size();
   int totalNumBytes = 0;

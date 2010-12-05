@@ -4,19 +4,25 @@
 #include "BufferManager.h"
 #include "Tuple.h"
 
-Projection::Projection(IRelationalOperator & child, const Schema * schema) :
-  m_child(child), m_consumed(true), m_next(0)
+Projection::Projection(IRelationalOperator * child, ProjectionList & columns) 
+  : m_consumed(true), m_next(0), m_columns(columns)
 {
-  m_rsize = schema->rsize();
+
+  m_schema = new Schema();
+  for (int i = 0; i < m_columns.size(); i++)
+    {
+      m_schema->add(m_columns[i]);
+    }
+  m_rsize = m_schema->rsize();
+
+  m_child = child;
  
   for (int i = 0; i < sizeof(m_buffer) / sizeof(m_buffer[0]); i++)
     m_buffer[i] = BufferManager::getInstance()->allocate();
 
-  m_tuple[IN].schema(m_child.schema());
-  m_tuple[OUT].schema(schema);
-
-  for (int i = 0; i < sizeof(m_tuple) / sizeof(m_tuple[0]); i++) 
-      m_tuple[i].m_data = new byte[m_tuple[i].schema()->rsize()];
+  m_tuple.schema(m_child->schema());
+  m_tuple.m_data = new byte[m_child->schema()->rsize()];
+  m_data = new byte[m_rsize];
 }
 
 Projection::~Projection()
@@ -24,8 +30,10 @@ Projection::~Projection()
   for (int i = 0; i < sizeof(m_buffer) / sizeof(m_buffer[0]); i++)
     BufferManager::getInstance()->deallocate(m_buffer[i]);
 
-  for (int i = 0; i < sizeof(m_tuple) / sizeof(m_tuple[0]); i++)
-    delete [] m_tuple[i].m_data;
+  delete m_child;
+  delete m_schema;
+  delete [] m_tuple.m_data;
+  delete [] m_data;
 }
 
 bool Projection::moveNext()
@@ -43,8 +51,8 @@ bool Projection::moveNext()
 	  m_consumed = false;
 
 	  m_buffer[IN]->clear();
-	  if (m_child.moveNext())
-	    m_child.next(*m_buffer[IN]);
+	  if (m_child->moveNext())
+	    m_child->next(*m_buffer[IN]);
 	  else
 	    break; // terminate loop.
 	}
@@ -52,13 +60,21 @@ bool Projection::moveNext()
       for (; m_next < m_buffer[IN]->getSize() && m_rsize <= available; m_next++)
 	{
 	  // retrieve tuple from memory buffer.
-	  m_buffer[IN]->get(m_tuple[IN].m_data, 
-			    m_next * m_tuple[IN].schema()->rsize(), 
-			    m_tuple[IN].schema()->rsize());
-	  // extract required data.
-	  m_tuple[OUT].map(&m_tuple[IN]);
-	  // copy tuple to memory buffer.
-	  m_buffer[OUT]->put(m_tuple[OUT].m_data, offset, m_rsize);
+	  m_buffer[IN]->get(m_tuple.m_data, 
+			    m_next * m_tuple.schema()->rsize(), 
+			    m_tuple.schema()->rsize());
+
+	  // extract projected data.
+	  int to = 0;
+	  for (int i = 0; i < m_columns.size(); i++)
+	    {
+	      const Attribute * attribute = m_columns[i];
+	      m_tuple.value((char *)m_data + to, *attribute);
+	      to += attribute->size();
+	    }
+
+	  // copy extracted data to memory buffer.
+	  m_buffer[OUT]->put(m_data, offset, m_rsize);
 
 	  // book-keeping.
 	  offset += m_rsize;
@@ -80,19 +96,23 @@ void Projection::next(MemoryBlock & buffer)
 
 const Schema * Projection::schema() const
 {
-  return m_tuple[OUT].schema();
+  return m_schema;
 }
 
 void Projection::dump(std::ostream & stream, char fs, char rs)
 {
+
+  Tuple t;
+  t.schema(m_schema);
+  t.m_data = m_data;
   
   while (moveNext())
     { 
       
       for (int i = 0; i < m_buffer[OUT]->getSize(); i++)
 	{
-	  m_buffer[OUT]->get(m_tuple[OUT].m_data, i * m_rsize, m_rsize);
-	  m_tuple[OUT].dump(stream, fs, rs);
+	  m_buffer[OUT]->get(m_data, i * m_rsize, m_rsize);
+	  t.dump(stream, fs, rs);
 	}
     }
 

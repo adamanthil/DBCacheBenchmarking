@@ -2,3 +2,4 @@
 #include "SequentialScan.h"
 #include "Projection.h"
 #include "NestedBlockJoin.h"
+#include "MergeJoin.h"

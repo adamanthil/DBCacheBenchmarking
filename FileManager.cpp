@@ -215,8 +215,8 @@ void FileManager::loadSchema(const std::string & filename)
 
       schema.getline(buffer, sizeof(buffer));
 
-      Attribute * a = new Attribute(aid, name, tname, length, Attribute::type(type));
-      sch->add(a);
+      Attribute a(aid, 0, name, tname, length, Attribute::type(type));
+      sch->add(&a);
     } 
     schema.getline(buffer, sizeof(buffer)); // read </table>
     Table * tbl = new Table(tid, tname, path, sch);

@@ -21,67 +21,84 @@ typedef ConstantOperand<const char *> StringConstant;
 typedef VariableOperand<int> IntVariable;
 typedef VariableOperand<const char *> StringVariable;
 
-void SelectAll(Table & table, const Schema & schema, const Schema & projection)
+void SelectAll(Table & table, const Schema & schema)
 {
+  ProjectionList columns;
+
+  columns.push_back(schema[0]);
+  columns.push_back(schema[1]);
+  columns.push_back(schema[3]);
+
   IRelationalOperator * scan = new SequentialScan(table.path(), &schema);
-  IRelationalOperator * proj = new Projection(*scan, &projection);
+  IRelationalOperator * proj = new Projection(scan, columns);
 
   proj->dump(std::cout);
 
-  delete scan;
   delete proj;
 }
 
-void CartesianJoin(Table & table1, Table & table2) {
-	IRelationalOperator * scan1 = new SequentialScan(table1.path(), table1.schema());
-	IRelationalOperator * scan2 = new SequentialScan(table2.path(), table2.schema());
-	IRelationalOperator * loopJoin = new NestedBlockJoin(scan1, scan2, NULL);
-	IRelationalOperator * projection = new Projection(*loopJoin, loopJoin->schema());
-	projection->dump(std::cout);
+void CartesianJoin(Table & table1, Table & table2) 
+{
+  /*
+  IRelationalOperator * scan1 = new SequentialScan(table1.path(), table1.schema());
+  IRelationalOperator * scan2 = new SequentialScan(table2.path(), table2.schema());
+  IRelationalOperator * loopJoin = new NestedBlockJoin(scan1, scan2, NULL);
+  IRelationalOperator * projection = new Projection(loopJoin, loopJoin->schema());
+  projection->dump(std::cout);
 	
-	delete projection;
-	delete loopJoin;
-	delete scan2;
-	delete scan1;
+  delete projection;
+  delete loopJoin;
+  delete scan2;
+  delete scan1;
+  */
 }
 
-void SelectWhere(Schema & schema, int field)
+void EquiJoin(Table & t1, Table & t2)
 {
-  Schema filter;
-  
-  IntConstant l0(2, INTEGER);
-  IntVariable r0(schema["id"], INTEGER);
+  /*
+  IRelationalOperator * scan1 = new SequentialScan(t1.path(), t1.schema());
+  IRelationalOperator * scan2 = new SequentialScan(t2.path(), t2.schema());
+  IRelationalOperator * join = new MergeJoin(scan1, scan2);
+  IRelationalOperator * projection = new Projection(join, join->schema());
+  projection->dump(std::cout);
 
-  StringConstant l1("Greig               ", STRING);
-  StringVariable r1(schema["fname"], STRING);
+  delete projection;
+  */
+}
 
-  BooleanFactor<int> f0(r0, LT, l0);
-  BooleanFactor<const char *> f1(l1, EQ, r1);
-  BooleanTerm t0;
-  BooleanTerm t1;
-  BooleanExpression exp(2);
+void SelectWhere(Table & tbl)
+{
+ 
+  ProjectionList columns;
+  SelectionList filter;
+
+  filter.push_back(tbl.schema()->at(1));
+
+  for (int i = 0; i < tbl.schema()->nitems(); i++)
+    {
+      columns.push_back(tbl.schema()->at(i));
+    }
+
+  IntConstant l(30, INTEGER);
+  IntVariable r(tbl.schema()->at(1), INTEGER);
+
+  BooleanFactor<int> f(r, GE, l);
+  BooleanTerm t;
+  BooleanExpression exp(1);
+
+  t.factor(&f);
+  exp.term(0, &t);
+
   std::vector<IVariableOperand *> vars;
+  vars.push_back(&r);
 
-  filter.add(schema.at(0));
-  filter.add(schema.at(2));
-
-  t1.factor(&f1);
-  t0.factor(&f0);
-
-  exp.term(0, &t1);
-  exp.term(1, &t0);
-
-  vars.push_back(&r0);
-  vars.push_back(&r1);
-
-  WhereClause clause(exp, &filter, vars);
+  WhereClause clause(exp, filter, vars);
 
   IRelationalOperator * scan = 
-    new SequentialScan(std::string("Student.tab"), &schema, &clause);
-  IRelationalOperator * proj = new Projection(*scan, &schema);
+    new SequentialScan(tbl.path(), tbl.schema(), &clause);
+  IRelationalOperator * proj = new Projection(scan, columns);
   proj->dump(std::cout, '|', '\n');
 
-  delete scan;
   delete proj;
   
 }
@@ -99,11 +116,11 @@ int main(int argc, char ** argv)
   FileManager * fm = FileManager::getInstance();
   Table * t = fm->getTable("test1");
   
-  SelectAll(*t, *t->schema(), *t->schema());
+  SelectAll(*t, *t->schema());
+  SelectWhere(*t);
 
-  CartesianJoin(*t,*t);
-  //SelectWhere(schema, 2);
-  
+  //CartesianJoin(*t,*t);
+  //EquiJoin(*t, *t);
 }
 
 #endif

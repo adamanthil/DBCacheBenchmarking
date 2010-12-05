@@ -2,17 +2,20 @@
 #define PROJECTION_H_
 
 #include <iostream>
+#include <vector>
 
 #include "IRelationalOperator.h"
 #include "Schema.h"
 #include "Tuple.h"
+
+typedef std::vector<const Attribute *> ProjectionList;
 
 class Projection : public IRelationalOperator
 {
  private:
   enum { IN = 0, OUT = 1 };
 
-  /** minimum sace required to store tuple. */
+  /** minimum space required to store tuple. */
   int m_rsize;
   /** flag to check if all data from current buffer has been consumed. */
   bool m_consumed; 
@@ -20,10 +23,14 @@ class Projection : public IRelationalOperator
   int m_next; 
 
   MemoryBlock * m_buffer[2];
-  Tuple m_tuple[2];
-  IRelationalOperator & m_child;
+  IRelationalOperator * m_child;
+  ProjectionList & m_columns;
+
+  Tuple m_tuple;
+  byte * m_data;
+  Schema * m_schema;
  public:
-  Projection(IRelationalOperator & op, const Schema * schema);
+  Projection(IRelationalOperator * op, ProjectionList & projList);
   ~Projection();
   
   virtual const Schema * schema() const;

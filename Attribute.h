@@ -15,16 +15,18 @@ typedef enum
 class Attribute 
 {
 private:
-  int m_id;
+  int m_id; 
+  int m_position; // relative position in schema
   std::string m_table;
   std::string m_name;
   size_t m_size;
   field_type_t m_type;
 public:
-  Attribute(int id, std::string name, std::string table, 
+  Attribute(int id, int position, std::string name, std::string table, 
 	    size_t size, field_type_t type);
 
   int id() const;
+  int position() const;
   std::string qualifiedName() const;
   std::string table() const;
   const std::string & name() const;

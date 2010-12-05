@@ -66,7 +66,7 @@ bool SequentialScan::moveNext()
 	  /* extract data to update variable expressions. */
 	  if (m_clause != NULL)
 	    {
-	      page->get(rid, m_clause->schema(), buffer, 
+	      page->get(rid, (std::vector<Attribute *> &)m_clause->filter(), buffer, 
 			m_clause->schema()->rsize());
 	    }
 

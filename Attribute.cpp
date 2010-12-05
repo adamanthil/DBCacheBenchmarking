@@ -1,38 +1,37 @@
 #include "Attribute.h"
 
-Attribute::Attribute(int id, std::string name, std::string table, 
+Attribute::Attribute(int id, int position, std::string name, std::string table, 
 		     size_t size, field_type_t type) :
-  m_id(id), m_name(name), m_table(table), m_size(size), m_type(type)
+  m_id(id), m_position(position), m_name(name), m_table(table), m_size(size), m_type(type)
 {
 }
 
 field_type_t Attribute::type(const std::string & t)
 {
-  if (t == "BIT")
-  {
-    return BIT;
-  }
-  else if (t == "INTEGER")
-  {
-    return INTEGER;
-  }
-  else if (t == "REAL")
-  {
-    return REAL;
-  }
-  else if (t == "CHAR")
-  {
-    return CHAR;
-  }
-  else
-  {
-    return STRING;
+  switch (t[0])
+    {
+    case 'I':
+      return INTEGER;
+    case 'R':
+      return REAL;
+    case 'C':
+      return CHAR;
+    case 'S':
+      return STRING;
+    case 'B':
+    default:
+      return BIT;
   }
 }
 
 int Attribute::id() const
 {
   return m_id;
+}
+
+int Attribute::position() const
+{
+  return m_position;
 }
 
 const std::string & Attribute::name() const 

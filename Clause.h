@@ -6,18 +6,22 @@
 #include "Tuple.h"
 #include "Schema.h"
 
+typedef std::vector<const Attribute *> SelectionList;
 
 class WhereClause
 {
  private:
   BooleanExpression & m_expression;
+  SelectionList & m_items;
   Tuple m_tuple;
  public:
-  WhereClause(BooleanExpression &, const Schema *, 
+  WhereClause(BooleanExpression &, SelectionList & items, 
 	      std::vector<IVariableOperand *> &);
+  ~WhereClause();
+
   bool evaluate(const Tuple & tuple);
+  const SelectionList & filter() const;
   const Schema * schema() const;
-  bool evaluate();
 };
 
 class JoinClause
