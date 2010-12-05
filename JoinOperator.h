@@ -5,10 +5,17 @@
 
 class JoinOperator : public IRelationalOperator {
 protected:
+	IRelationalOperator * m_child[2];
+	enum { LEFT = 0; RIGHT = 1};
+	
+	Schema m_schema;
 	// Creates a new schema as a concatenation of 2 others
-	Schema * concatSchema(const Schema * s1, const Schema * s2);
+	void concatSchema(const Schema * s1, const Schema * s2);
 public:
-	virtual const Schema * schema() const = 0;
+	JoinOperator(IRelationalOperator * r1, IRelationalOperator * r2,
+			JoinClause * m_clause);
+	~JoinOperator();
+	virtual const Schema * schema() const;
 	virtual bool moveNext() = 0;
 	virtual void next(MemoryBlock & block) = 0;
 	virtual void reset() = 0;
