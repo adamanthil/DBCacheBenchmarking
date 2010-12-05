@@ -6,10 +6,11 @@
 
 #include "Attribute.h"
 
-class Schema : public std::vector<Attribute *>
+class Schema : private std::vector<Attribute *>
 {
  private:
   size_t m_size;
+  std::vector<int> m_offset;
  public:
   Schema();
   ~Schema();
@@ -17,8 +18,10 @@ class Schema : public std::vector<Attribute *>
   size_t rsize() const;
   size_t nitems() const;
   int offset(const Attribute * attribute) const;
-  int offset(int fpos);
+  int offset(int fpid) const;
   const Attribute * operator[](const std::string &) const;
+  const Attribute * operator[](int fid) const;
+  const Attribute * at(int fid) const;
 };
 
 #endif
