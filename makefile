@@ -4,6 +4,7 @@ SRC = Application.cpp \
 	DiskPage.cpp \
 	MemoryBlock.cpp \
 	FileDescriptor.cpp \
+	Table.cpp \
 	SequentialScan.cpp \
 	JoinOperator.cpp \
 	NestedBlockJoin.cpp \
@@ -17,8 +18,7 @@ SRC = Application.cpp \
 	Operand.cpp \
 	Clause.cpp \
 	PageLayout.cpp \
-	DataCreator.cpp \
-	Table.cpp
+	DataCreator.cpp 
 
 all:
 	g++ -g -O0 $(SRC) 

@@ -13,8 +13,6 @@
 
 #include "Operand.h"
 #include "BooleanExpression.h"
-#include "Table.h"
-
 #include "DataCreator.h"
 
 typedef ConstantOperand<int> IntConstant;
@@ -23,7 +21,7 @@ typedef ConstantOperand<const char *> StringConstant;
 typedef VariableOperand<int> IntVariable;
 typedef VariableOperand<const char *> StringVariable;
 
-void SelectAll(Table & table, Schema & schema, Schema & projection)
+void SelectAll(Table & table, const Schema & schema, const Schema & projection)
 {
   IRelationalOperator * scan = new SequentialScan(table.path(), &schema);
   IRelationalOperator * proj = new Projection(*scan, &projection);
@@ -80,26 +78,16 @@ int main(int argc, char ** argv)
   Schema schema;
   Schema projection;
   
-  //DataCreator::Create("config");
-  FileManager::Initialize("config");
+  DataCreator::CreateDB("createdb", false);
 
-  /* Student Table Schema */
-  schema.add(new Attribute(0, "id", "Student", 4, INTEGER));
-  schema.add(new Attribute(1, "ssn", "Student", 10, STRING));
-  schema.add(new Attribute(2, "fname", "Student", 20, STRING));
-  schema.add(new Attribute(3, "lname", "Student", 20, STRING));
-  schema.add(new Attribute(4, "year", "Student", 2, STRING));
-  Table student(0, std::string("student"), std::string("Student.tab"), 
-		&schema);
+  BufferManager::Initialize(64);
+  FileManager::Initialize("config", "db.xml");
+
+  FileManager * fm = FileManager::getInstance();
+  Table * t = fm->getTable("test");
   
-  BufferManager::Initialize(512);
-
-  projection.add(schema["ssn"]);
-  projection.add(schema["fname"]);
-  projection.add(schema["lname"]);
-
-  SelectAll(student, schema, projection);
-  SelectWhere(schema, 2);
+  SelectAll(*t, *t->schema(), *t->schema());
+  //SelectWhere(schema, 2);
   
 }
 

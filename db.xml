@@ -1,0 +1,18 @@
+<database>
+  <tables>
+    <table id="0" name="test1" path="testTable1.tab">
+      <schema>
+        <attribute id="0" name="id" type="INTEGER" length="4" />
+	<attribute id="1" name="age" type="INTEGER" length="4" />
+	<attribute id="2" name="sid" type="INTEGER" length="4" />
+	<attribute id="3" name="lName" type="STRING" length="8" />
+      </schema>
+    </table>
+    <table id="1" name="test2" path="testTable2.tab">
+      <schema>
+        <attribute id="0" name="id" type="INTEGER" length="4" />
+        <attribute id="1" name="tNum" type="INTEGER" length="4" />
+        <attribute id="2" name="course" type="STRING" length="6" />
+      </schema>
+  </tables>
+</database>

@@ -16,15 +16,15 @@ class SequentialScan : public IRelationalOperator
   FileDescriptor * m_fd;
   MemoryBlock * m_buffer;
   WhereClause * m_clause;
-  Schema * m_schema;
+  const Schema * m_schema;
   byte * m_data;
 
   byte * extract(byte *, const DiskPage *, int, const Schema *);
   
  public:
   SequentialScan(const std::string & filename,
-		 Schema * schema);
-  SequentialScan(const std::string & filename, Schema * schema,
+		 const Schema * schema);
+  SequentialScan(const std::string & filename, const Schema * schema,
 		 WhereClause * clause);
   ~SequentialScan();
 

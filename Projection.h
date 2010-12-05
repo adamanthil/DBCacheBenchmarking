@@ -23,7 +23,7 @@ class Projection : public IRelationalOperator
   Tuple m_tuple[2];
   IRelationalOperator & m_child;
  public:
-  Projection(IRelationalOperator & op, Schema * schema);
+  Projection(IRelationalOperator & op, const Schema * schema);
   ~Projection();
   
   virtual const Schema * schema() const;

@@ -6,6 +6,11 @@ Table::Table(int tid, std::string name, std::string path, Schema * schema)
   m_schema = schema;
 }
 
+Table::~Table()
+{
+  delete m_schema;
+}
+
 const Schema * Table::schema() const 
 {
   return m_schema;
