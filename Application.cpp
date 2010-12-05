@@ -39,18 +39,20 @@ void SelectAll(Table & table, const Schema & schema)
 
 void CartesianJoin(Table & table1, Table & table2) 
 {
-  /*
-  IRelationalOperator * scan1 = new SequentialScan(table1.path(), table1.schema());
-  IRelationalOperator * scan2 = new SequentialScan(table2.path(), table2.schema());
-  IRelationalOperator * loopJoin = new NestedBlockJoin(scan1, scan2, NULL);
-  IRelationalOperator * projection = new Projection(loopJoin, loopJoin->schema());
-  projection->dump(std::cout);
+	IRelationalOperator * scan1 = new SequentialScan(table1.path(), table1.schema());
+	IRelationalOperator * scan2 = new SequentialScan(table2.path(), table2.schema());
+	IRelationalOperator * loopJoin = new NestedBlockJoin(scan1, scan2, NULL);
 	
-  delete projection;
-  delete loopJoin;
-  delete scan2;
-  delete scan1;
-  */
+	ProjectionList columns;
+	for (int i = 0; i < loopJoin->schema()->nitems(); i++)
+	{
+		columns.push_back(loopJoin->schema()->at(i));
+	}
+	
+	IRelationalOperator * projection = new Projection(loopJoin, columns);
+	projection->dump(std::cout);
+
+	delete projection;
 }
 
 void EquiJoin(Table & t1, Table & t2)
@@ -140,8 +142,8 @@ int main(int argc, char ** argv)
   SelectAll(*t0, *t0->schema());
   //  SelectWhere(*t);
 
-  //CartesianJoin(*t,*t);
-  EquiJoin(*t, *t0);
+  CartesianJoin(*t,*t);
+  //EquiJoin(*t, *t0);
 }
 
 #endif
