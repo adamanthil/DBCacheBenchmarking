@@ -8,10 +8,11 @@ NestedBlockJoin::NestedBlockJoin(IRelationalOperator * r1, IRelationalOperator *
 	m_data = new byte[m_schema.rsize()];
 	m_next[LEFT] = 0;
 	m_next[RIGHT] = 0;
+	m_childTuple[LEFT].m_data = new byte[r1->schema()->rsize()];
+	m_childTuple[RIGHT].m_data = new byte[r2->schema()->rsize()];
 	
 	for(int i = 0; i < 2; i++) {
 		m_childBuffer[i] = BufferManager::getInstance()->allocate();
-		m_childTuple[i].m_data = new byte[m_child[i]->schema()->rsize()];
 	}
 }
 
@@ -48,9 +49,8 @@ bool NestedBlockJoin::nextTuple(int branch, Tuple * tuple) {
 	
 	if(hasNext) {
 		m_childBuffer[branch]->get(tuple->m_data, 
-			    m_next[branch] * tuple->schema()->rsize(), 
-			    tuple->schema()->rsize());
-		m_next[branch]++;
+			    m_next[branch] * m_child[branch]->schema()->rsize(), 
+			    m_child[branch]->schema()->rsize());
 	}
 	return hasNext;
 }
@@ -70,8 +70,8 @@ bool NestedBlockJoin::moveNext() {
 			
 			if(m_clause == NULL || m_clause->evaluate(m_childTuple[LEFT], m_childTuple[RIGHT])) {
 				// Merge new tuple into temporary m_data location
-				memcpy(m_data, m_childTuple[LEFT].m_data, m_childTuple[LEFT].schema()->rsize());
-				memcpy(m_data + m_childTuple[LEFT].schema()->rsize(), m_childTuple[RIGHT].m_data, m_childTuple[RIGHT].schema()->rsize());
+				memcpy(m_data, m_childTuple[LEFT].m_data, m_child[LEFT]->schema()->rsize());
+				memcpy(m_data + m_child[LEFT]->schema()->rsize(), m_childTuple[RIGHT].m_data, m_child[RIGHT]->schema()->rsize());
 			
 				// Copy tuple to memory buffer
 				m_buffer->put(m_data, offset, rsize);
@@ -81,8 +81,21 @@ bool NestedBlockJoin::moveNext() {
 				available -= rsize;
 				nrecords++;
 			}
+			
+			m_next[RIGHT]++;
+			
+			// Return now so we dont increment if we are exiting due to no more room in buffer
+			if(rsize >= available) {
+				m_buffer->setSize(nrecords);
+				return true;
+			}
+			
 		}
+		
 		m_child[RIGHT]->reset();
+		m_next[RIGHT] = 0;
+		m_next[LEFT]++;
+
 	}
 
 	m_buffer->setSize(nrecords);
