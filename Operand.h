@@ -69,7 +69,6 @@ Operand<T>::Operand(Type opType, field_type_t fieldType)
 template<typename T>
 int Operand<T>::compareTo(IOperand<T> & other)
 {
-
   switch (m_fieldType)
     {
     case INTEGER:

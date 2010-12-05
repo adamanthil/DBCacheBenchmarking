@@ -44,11 +44,11 @@ void SelectWhere(Schema & schema, int field)
   StringConstant l1("Greig               ", STRING);
   StringVariable r1(schema["fname"], STRING);
 
-  BooleanFactor<int> f0(r0, EQ, l0);
+  BooleanFactor<int> f0(r0, LT, l0);
   BooleanFactor<const char *> f1(l1, EQ, r1);
   BooleanTerm t0;
   BooleanTerm t1;
-  BooleanExpression exp(1);
+  BooleanExpression exp(2);
   std::vector<IVariableOperand *> vars;
 
   filter.add(schema.at(0));
@@ -66,7 +66,7 @@ void SelectWhere(Schema & schema, int field)
   WhereClause clause(exp, &filter, vars);
 
   IRelationalOperator * scan = 
-    new SequentialScan(std::string("Student.dat"), &schema, &clause);
+    new SequentialScan(std::string("Student.tab"), &schema, &clause);
   IRelationalOperator * proj = new Projection(*scan, &schema);
   proj->dump(std::cout, '|', '\n');
 
@@ -83,12 +83,7 @@ int main(int argc, char ** argv)
   //DataCreator::Create("config");
   FileManager::Initialize("config");
 
-  
-  Table * t = fm->table("student");
-  schema.add(t->schema(0));
-  
-  /*
-  / * Student Table Schema * /
+  /* Student Table Schema */
   schema.add(new Attribute(0, "id", "Student", 4, INTEGER));
   schema.add(new Attribute(1, "ssn", "Student", 10, STRING));
   schema.add(new Attribute(2, "fname", "Student", 20, STRING));
@@ -96,7 +91,7 @@ int main(int argc, char ** argv)
   schema.add(new Attribute(4, "year", "Student", 2, STRING));
   Table student(0, std::string("student"), std::string("Student.tab"), 
 		&schema);
-  */
+  
   BufferManager::Initialize(512);
 
   projection.add(schema["ssn"]);
