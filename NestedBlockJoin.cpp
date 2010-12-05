@@ -8,8 +8,11 @@ NestedBlockJoin::NestedBlockJoin(IRelationalOperator * r1, IRelationalOperator *
 	m_data = new byte[m_schema.rsize()];
 	m_next[LEFT] = 0;
 	m_next[RIGHT] = 0;
-	m_childTuple[LEFT].m_data = new byte[r1->schema()->rsize()];
-	m_childTuple[RIGHT].m_data = new byte[r2->schema()->rsize()];
+	
+	for(int i = 0; i < 2; i++) {
+		m_childBuffer[i] = BufferManager::getInstance()->allocate();
+		m_childTuple[i].m_data = new byte[m_child[i]->schema()->rsize()];
+	}
 }
 
 NestedBlockJoin::~NestedBlockJoin() {
@@ -17,9 +20,12 @@ NestedBlockJoin::~NestedBlockJoin() {
 		BufferManager::getInstance()->deallocate(m_buffer);
     }
 
+	for(int i = 0; i < 2; i++) {
+		BufferManager::getInstance()->deallocate(m_buffer);
+		delete[] m_childTuple[i].m_data;
+	}
+	
 	delete[] m_data;
-	delete[] m_childTuple[LEFT].m_data;
-	delete[] m_childTuple[RIGHT].m_data;
 }
 
 void NestedBlockJoin::next(MemoryBlock & block) {
