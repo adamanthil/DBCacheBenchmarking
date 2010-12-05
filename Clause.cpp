@@ -13,8 +13,20 @@ WhereClause::WhereClause(BooleanExpression & expression,
   m_tuple.m_data = NULL;
   m_tuple.schema(schema);
 
+  /* TODO: must be a better way todo this update the references */
   for (int i = 0; i < variables.size(); i++)
-    variables[i]->data(&m_tuple);
+    {
+      variables[i]->data(&m_tuple);
+      const Attribute * attribute = variables[i]->attribute();
+      for (int j = 0; j < schema->nitems(); j++)
+	{
+	  if (schema->at(j)->id() == attribute->id())
+	    {
+	      variables[i]->attribute(schema->at(j));
+	      break;
+	    }
+	}
+    }
 }
 
 WhereClause::~WhereClause()
