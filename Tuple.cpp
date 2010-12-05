@@ -53,7 +53,7 @@ void Tuple::dump(std::ostream & output, char fs, char rs)
   char * buffer = new char[m_schema->rsize() + 1]; // + 1 for eof marker
   for (int i = 0; i < m_schema->nitems(); i++)
     {
-      Attribute * attribute = m_schema->at(i);
+      const Attribute * attribute = m_schema->at(i);
 
       switch (attribute->type())
 	{

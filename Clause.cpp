@@ -8,7 +8,7 @@ WhereClause::WhereClause(BooleanExpression & expression, const Schema * schema,
   m_tuple.schema(schema);
 
   for (int i = 0; i < variables.size(); i++)
-    variables[i]->data(&m_tuple);    
+    variables[i]->data(&m_tuple);
 }
 
 const Schema * WhereClause::schema() const
