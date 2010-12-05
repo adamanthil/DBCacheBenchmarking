@@ -6,12 +6,13 @@
 
 #include "Attribute.h"
 
-class Schema : public std::vector<const Attribute *>
+class Schema : public std::vector<Attribute *>
 {
  private:
   size_t m_size;
  public:
   Schema();
+  ~Schema();
   void add(const Attribute * attribute);
   size_t rsize() const;
   size_t nitems() const;

@@ -47,7 +47,7 @@ void Tuple::map(const Tuple * other)
     }
 }
 
-void Tuple::dump(std::ostream & output, char fs, char rs)
+void Tuple::dump(std::ostream & output, char fs, char rs) const
 {
   int offset = 0;
   char * buffer = new char[m_schema->rsize() + 1]; // + 1 for eof marker

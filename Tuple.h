@@ -26,7 +26,7 @@ class Tuple
 
   void map(const Tuple * other);
 
-  void dump(std::ostream & strm, char fs = '|', char rs = '\n');
+  void dump(std::ostream & strm, char fs = '|', char rs = '\n') const;
  private:
   void value(void * buffer, size_t length, const Attribute & attribute) const;
 };

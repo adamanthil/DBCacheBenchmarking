@@ -1,3 +1,5 @@
+#include <algorithm>
+
 #include "Schema.h"
 
 Schema::Schema() :
@@ -5,9 +7,19 @@ Schema::Schema() :
 {
 }
 
+Schema::~Schema()
+{
+  std::for_each(begin(), end(), free);
+}
+
 void Schema::add(const Attribute * attribute)
 {
-  push_back(attribute);
+  Attribute * a = new Attribute(attribute->id(),
+				attribute->name(),
+				attribute->table(),
+				attribute->size(),
+				attribute->type());
+  push_back(a);
   m_size += attribute->size();
 }
 
