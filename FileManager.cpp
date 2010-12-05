@@ -111,7 +111,6 @@ void FileManager::loadData(const std::string & formatFile)
     
     PageLayout * a = new PageLayout(nPartitions, nFields, nBytesPerRecord, FtoPMap, FtoBMap, FtoLMap, PtoLMap, PtoBMap);
     
-    
     std::ifstream table(tableName.c_str(), std::ios::in | std::ios::binary);
     int nRecs = 0;
     std::list<int> * pages = new std::list<int>();
@@ -124,13 +123,13 @@ void FileManager::loadData(const std::string & formatFile)
       {
         pages->push_back(bufferLoc);
         bufferLoc++;
-        nRecs = 0;
         for(int l = 0; l < nPartitions; l++)
 	{
            currentPositions[l] = startPositions[l];
         }
 	DiskPage * dp = new DiskPage(a,data,tableName);
 	data->setSize(nRecs);
+	nRecs = 0;
 	data = new MemoryBlock(m_pageSize);
         m_files.push_back(dp);
       }
