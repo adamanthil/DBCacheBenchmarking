@@ -37,11 +37,36 @@ void SelectAll(Table & table, const Schema & schema)
   delete proj;
 }
 
-void CartesianJoin(Table & table1, Table & table2) 
+void LoopJoin(Table & table1, Table & table2) 
 {
+	int joinCol1 = 0;
+	int joinCol2 = 0;
+	
+	BooleanExpression bexp(1);
+	
+	IntVariable r1(table1.schema()->at(joinCol1), INTEGER);
+	IntVariable r2(table2.schema()->at(joinCol2), INTEGER);
+	BooleanFactor<int> f(r1, EQ, r2);
+	BooleanTerm t;
+	
+	t.factor(&f);
+	
+	bexp.term(0,&t);
+	
+	SelectionList filter[2];
+	filter[0].push_back(table1.schema()->at(joinCol1));
+	filter[1].push_back(table1.schema()->at(joinCol2));
+	
+	std::vector<IVariableOperand *> variables[2];
+	
+	variables[0].push_back(&r1);
+	variables[1].push_back(&r2);
+	
+	JoinClause joinClause(bexp, filter, variables);
+	
 	IRelationalOperator * scan1 = new SequentialScan(table1.path(), table1.schema());
 	IRelationalOperator * scan2 = new SequentialScan(table2.path(), table2.schema());
-	IRelationalOperator * loopJoin = new NestedBlockJoin(scan1, scan2, NULL);
+	IRelationalOperator * loopJoin = new NestedBlockJoin(scan1, scan2, &joinClause);
 	
 	ProjectionList columns;
 	for (int i = 0; i < loopJoin->schema()->nitems(); i++)
@@ -129,20 +154,20 @@ int main(int argc, char ** argv)
   Schema schema;
   Schema projection;
   
-  DataCreator::CreateDB("createdb", true);
+  DataCreator::CreateDB("createdb1", false);
 
   BufferManager::Initialize();
-  FileManager::Initialize("config", "db.xml");
+  FileManager::Initialize("config2", "db2.xml");
 
   FileManager * fm = FileManager::getInstance();
   Table * t = fm->getTable("test1");
-  Table * t0 = fm->getTable("test2");
+  //Table * t0 = fm->getTable("test2");
   
   SelectAll(*t, *t->schema());
-  SelectAll(*t0, *t0->schema());
+  //SelectAll(*t0, *t0->schema());
   //  SelectWhere(*t);
 
-  CartesianJoin(*t,*t);
+  LoopJoin(*t,*t);
   //EquiJoin(*t, *t0);
 }
 
