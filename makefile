@@ -26,7 +26,7 @@ debug:
 	g++ -g -o dbl -O0 $(SRC) 
 
 release:
-	g++ -o dblite -O3 $(SRC) 
+	g++ -o dblite -O3 -funroll-loops $(SRC) 
 
 clean:
 	rm -rf *.o *~ *.out *.exe *.prog
