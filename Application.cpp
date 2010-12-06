@@ -5,9 +5,12 @@
 #include <iostream>
 #include <new>
 
-#include "Schema.h"
+#include "Database.h"
 #include "FileManager.h"
 #include "BufferManager.h"
+#include "Query.h"
+
+#include "Schema.h"
 #include "Attribute.h"
 #include "Operators.h"
 
@@ -21,88 +24,121 @@ typedef ConstantOperand<const char *> StringConstant;
 typedef VariableOperand<int> IntVariable;
 typedef VariableOperand<const char *> StringVariable;
 
-void SelectAll(Table & table, const Schema & schema)
+void SelectAll(const Table & table)
 {
   ProjectionList columns;
 
-  columns.push_back(schema[0]);
-  columns.push_back(schema[1]);
+  //  for (int i = 0; i < schema.nitems() / 2; i++)
+  Schema schema;
+  if (table.id() == 0)
+    {
+      schema.add(table.schema()->at(0));
+      schema.add(table.schema()->at(8));
+      
+      columns.push_back(schema[0]);
+      columns.push_back(schema[1]);
+    }
+  if (table.id() == 1)
+    {
+      schema.add(table.schema()->at(1));
+      schema.add(table.schema()->at(2));
+
+      columns.push_back(schema[0]);
+      columns.push_back(schema[1]);
+    }
+  
   //columns.push_back(schema[3]);
 
   IRelationalOperator * scan = new SequentialScan(table.path(), &schema);
   IRelationalOperator * proj = new Projection(scan, columns);
 
-  proj->dump(std::cout);
+  //proj->dump(std::cout);
+  
+  Query q(1, proj);
 
-  delete proj;
+  std::cerr << "started select all: ";
+  q.profile();
+  q.stats(std::cout);
+  
 }
 
-void CartesianJoin(Table & table1, Table & table2) 
+void CartesianJoin(const Table & table1, const Table & table2) 
 {
-	IRelationalOperator * scan1 = new SequentialScan(table1.path(), table1.schema());
-	IRelationalOperator * scan2 = new SequentialScan(table2.path(), table2.schema());
-	IRelationalOperator * loopJoin = new NestedBlockJoin(scan1, scan2, NULL);
-	
-	ProjectionList columns;
-	for (int i = 0; i < loopJoin->schema()->nitems(); i++)
-	{
-		columns.push_back(loopJoin->schema()->at(i));
-	}
-	
-	IRelationalOperator * projection = new Projection(loopJoin, columns);
-	projection->dump(std::cout);
-
-	delete projection;
+  IRelationalOperator * scan1 = new SequentialScan(table1.path(), table1.schema());
+  IRelationalOperator * scan2 = new SequentialScan(table2.path(), table2.schema());
+  IRelationalOperator * loopJoin = new NestedBlockJoin(scan1, scan2, NULL);
+  
+  ProjectionList columns;
+  for (int i = 0; i < loopJoin->schema()->nitems(); i++)
+    {
+      columns.push_back(loopJoin->schema()->at(i));
+    }
+  
+  IRelationalOperator * projection = new Projection(loopJoin, columns);
+  projection->dump(std::cout);
+  
+  delete projection;
 }
 
-void EquiJoin(Table & t1, Table & t2)
+void EquiJoin(const Table & t1, const Table & t2)
 {
 
   ProjectionList columns;
 
-  IRelationalOperator * scan1 = new SequentialScan(t1.path(), t1.schema());
-  IRelationalOperator * scan2 = new SequentialScan(t2.path(), t2.schema());
+  Schema scan1Schema;
+  scan1Schema.add(t1.schema()->at(0));
+  scan1Schema.add(t1.schema()->at(8));
+
+  Schema scan2Schema;
+  scan2Schema.add(t2.schema()->at(1));
+  scan2Schema.add(t2.schema()->at(2));
+
+  IRelationalOperator * scan1 = new SequentialScan(t1.path(), &scan1Schema);
+  IRelationalOperator * scan2 = new SequentialScan(t2.path(), &scan2Schema);
   IRelationalOperator * join = new MergeJoin(scan1, scan2);
 
   for (int i = 0; i < join->schema()->nitems(); i++)
     {
+      if (i != 2)
       columns.push_back(join->schema()->at(i));
-    }
-  
+    }  
 
   IRelationalOperator * projection = new Projection(join, columns);
+
+  Query q(1, projection);
+  q.profile();
+  q.stats(std::cout);
+  
+  /*
   projection->dump(std::cout);
 
   delete projection;
-  
+  */
 }
 
-void SelectWhere(Table & tbl)
+void SelectWhere(const Table & tbl)
 {
  
   ProjectionList columns;
   SelectionList filter;
 
-  filter.push_back(tbl.schema()->at(1));
-  filter.push_back(tbl.schema()->at(0));
+  filter.push_back(tbl.schema()->at(8));
+  //  filter.push_back(tbl.schema()->at(9));
 
-  for (int i = 0; i < tbl.schema()->nitems(); i++)
-    {
-      columns.push_back(tbl.schema()->at(i));
-    }
+  columns.push_back(tbl.schema()->at(0));
+  columns.push_back(tbl.schema()->at(8));
 
   IntConstant l(25, INTEGER);
-  IntVariable r(tbl.schema()->at(1), INTEGER);
+  IntVariable r(tbl.schema()->at(8), INTEGER);
 
-  IntConstant l1(5, INTEGER);
-  IntVariable r1(tbl.schema()->at(0), INTEGER);
+  IntConstant l1(63, INTEGER);
+  IntVariable r1(tbl.schema()->at(8), INTEGER);
 
   BooleanFactor<int> f(r, GE, l);
   BooleanFactor<int> f1(r1, LE, l1);
   BooleanTerm t;
-  BooleanTerm t1;
 
-  BooleanExpression exp(2);
+  BooleanExpression exp(1);
 
   t.factor(&f);
   t.factor(&f1);
@@ -118,9 +154,16 @@ void SelectWhere(Table & tbl)
   IRelationalOperator * scan = 
     new SequentialScan(tbl.path(), tbl.schema(), &clause);
   IRelationalOperator * proj = new Projection(scan, columns);
-  proj->dump(std::cout, '|', '\n');
 
-  delete proj;
+  Query q(1, proj);
+
+  std::cerr << "started select where: ";
+  //q.profile();
+  //q.stats(std::cout);
+
+  // delete proj;
+
+   proj->dump(std::cout, '|', '\n');
   
 }
 
@@ -129,21 +172,24 @@ int main(int argc, char ** argv)
   Schema schema;
   Schema projection;
   
-  DataCreator::CreateDB("createdb", true);
+  std::cerr << "initializing..." << std::endl;
+  //DataCreator::CreateDB("createdb", false);
+  std::cerr << "done 1" << std::endl;
+  BufferManager::Initialize(4096);
+  std::cerr << "done 2" << std::endl;
+  Database * db = Database::getInstance();
+  FileManager::Initialize(argv[1], "db.xml");
+  std::cerr << "done yes" << std::endl;
 
-  BufferManager::Initialize();
-  FileManager::Initialize("config", "db.xml");
-
-  FileManager * fm = FileManager::getInstance();
-  Table * t = fm->getTable("test1");
-  Table * t0 = fm->getTable("test2");
+  const Table * t = db->table("test1");
+  const Table * t0 = db->table("test2");
   
-  SelectAll(*t, *t->schema());
-  SelectAll(*t0, *t0->schema());
-  //  SelectWhere(*t);
+  //SelectAll(*t);
+  //SelectAll(*t0);
+  //SelectWhere(*t);
 
-  CartesianJoin(*t,*t);
-  //EquiJoin(*t, *t0);
+  //CartesianJoin(*t,*t0);
+  EquiJoin(*t, *t0);
 }
 
 #endif

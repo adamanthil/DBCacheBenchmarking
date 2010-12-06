@@ -21,6 +21,11 @@ const std::string & Table::name() const
   return m_name;
 }
 
+int Table::id() const
+{
+  return m_id;
+}
+
 const std::string & Table::path() const 
 {
   return m_path;

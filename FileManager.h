@@ -34,11 +34,8 @@ class FileManager : public IFileManager
     static void Initialize(const std::string & config_file = "", const std::string & schema_file = "");
     static FileManager * getInstance();
     static FileManager * instance;
-    Table * getTable(std::string name);
     
     void loadData(const std::string & config_file);
-    void loadSchema(const std::string & schema_file);
-    const char* get_value(const std::string & str, const char * ch, char * c, int i);
 
     FileManager(const std::string & formatFile, const std::string & schemaFile);
     ~FileManager();

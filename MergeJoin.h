@@ -51,7 +51,8 @@ class MergeJoin : public IRelationalOperator
   bool isEmpty(int branch);
 
   bool get_tuple(int branch);
-  int compare(const Tuple &, const Tuple &);
+  // TODO: another cheat. 
+  int compare(const Tuple &, const Tuple &, int id);
   void concatenate(Tuple &, const Tuple &, const Tuple &);
   void create_merge_stack();
   int merge(size_t);
