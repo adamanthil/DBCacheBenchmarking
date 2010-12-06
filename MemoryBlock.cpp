@@ -5,7 +5,7 @@
 #include "MemoryBlock.h"
 
 MemoryBlock::MemoryBlock(size_t capacity) :
-  m_capacity(capacity)
+  m_capacity(capacity), m_size(0)
 {
   m_buffer = new byte[m_capacity];
   memset(m_buffer, 0, sizeof(m_buffer));

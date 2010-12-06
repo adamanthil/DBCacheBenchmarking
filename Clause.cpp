@@ -66,7 +66,25 @@ JoinClause::JoinClause(BooleanExpression & exp, SelectionList items[],
 		m_tuple[i].m_data = NULL;
 		m_tuple[i].schema(schema);
 		m_items[i] = items[i];
-	}
+		
+		for (int j = 0; j < variables[i].size(); j++)
+		    {
+		      /* set location of the data */
+		      variables[i].at(j)->data(&m_tuple[i]);
+
+		      /* TODO: must be a better way todo this */
+		      /* update variable attribute references */
+		      const Attribute * attribute = variables[i].at(j)->attribute();
+		      for (int k = 0; k < schema->nitems(); k++)
+			{
+			  if (schema->at(k)->id() == attribute->id())
+			    {
+			      variables[i].at(j)->attribute(schema->at(k));
+			      break;
+			    }
+			}
+		}
+	} 
 }
 
 JoinClause::~JoinClause() {

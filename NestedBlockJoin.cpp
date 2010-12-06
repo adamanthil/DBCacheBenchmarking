@@ -12,6 +12,7 @@ NestedBlockJoin::NestedBlockJoin(IRelationalOperator * r1, IRelationalOperator *
 	m_childTuple[RIGHT].m_data = new byte[r2->schema()->rsize()];
 	
 	for(int i = 0; i < 2; i++) {
+		// Allocate
 		m_childBuffer[i] = BufferManager::getInstance()->allocate();
 	}
 }
@@ -80,6 +81,7 @@ bool NestedBlockJoin::moveNext() {
 				offset += rsize;
 				available -= rsize;
 				nrecords++;
+				
 			}
 			
 			m_next[RIGHT]++;
@@ -93,7 +95,6 @@ bool NestedBlockJoin::moveNext() {
 		}
 		
 		m_child[RIGHT]->reset();
-		m_next[RIGHT] = 0;
 		m_next[LEFT]++;
 
 	}
