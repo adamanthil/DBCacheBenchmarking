@@ -117,7 +117,7 @@ void FileManager::loadData(const std::string & formatFile)
     MemoryBlock * data = new MemoryBlock(m_pageSize);
 
     
-    for (int k = 0; !table.eof(); k++)
+    for (int k = 0; k < nRecords; k++)
     {
       if(nRecs == recordsPerPage)
       {
