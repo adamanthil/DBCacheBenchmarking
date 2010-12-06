@@ -22,8 +22,11 @@ SRC = Application.cpp \
 	MergeJoin.cpp \
 	Query.cpp
 
-all:
-	g++ -g -O0 $(SRC) 
+debug:
+	g++ -g -o dbl -O0 $(SRC) 
+
+release:
+	g++ -o dblite -O3 -funroll-loops -Os $(SRC) 
 
 clean:
 	rm -rf *.o *~ *.out *.exe *.prog
