@@ -14,6 +14,7 @@ class Table
   Table(int id, std::string name, std::string path, Schema * schema);
   ~Table();
   const Schema * schema() const;
+  int id() const;
   const std::string & name() const;
   const std::string & path() const;
 };

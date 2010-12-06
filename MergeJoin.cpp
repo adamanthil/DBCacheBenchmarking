@@ -46,18 +46,16 @@ MergeJoin::~MergeJoin()
   std::for_each(m_merge_stack.begin(), m_merge_stack.end(), free);
 }
 
-int MergeJoin::compare(const Tuple & t0, const Tuple & t1)
+int MergeJoin::compare(const Tuple & t0, const Tuple & t1, int fid)
 {
   const Attribute * l = t0.schema()->at(0);
-  const Attribute * r = t1.schema()->at(0);
+  const Attribute * r = t1.schema()->at(0); // TODO: hard-coded values. 
 
   int a = 0;
   int b = 0;
 
   t0.value(&a, *l);
   t1.value(&b, *r);
-
-  //  std::cerr << "values = " << a << ", " << b << std::endl;
   
   return a - b;
 }
@@ -127,7 +125,7 @@ void MergeJoin::create_merge_stack()
   m_inBuffer[LEFT]->get(m_data, m_next[LEFT] * m_tuple[LEFT].schema()->rsize(), 
 			m_tuple[LEFT].schema()->rsize());
   
-  while (get_tuple(LEFT) && compare(t, m_tuple[LEFT]) == 0)
+  while (get_tuple(LEFT) && compare(t, m_tuple[LEFT], 0) == 0)
     {
       // push item unto merge stack.
       byte * data = new byte[m_tuple[LEFT].schema()->rsize()];
@@ -172,10 +170,11 @@ int MergeJoin::merge(size_t available)
 	 get_tuple(RIGHT))
     {
       // compare tuple from right branch with merge-stack. 
-      if (compare(m_tuple[RIGHT], t) == 0)
+      if (compare(t, m_tuple[RIGHT], 1) == 0)
 	{
+
 	  // merge item with all items on stack. 
-	  for ( ; m_merge_with < m_merge_stack.size() && rsize <= available; m_merge_with++ )
+	  for ( ; m_merge_with < m_merge_stack.size() && rsize <= available; m_merge_with++)
 	    {
 	      t.m_data = m_merge_stack[m_merge_with]; 
 	      concatenate(merged, t, m_tuple[RIGHT]); 
@@ -202,9 +201,9 @@ int MergeJoin::merge(size_t available)
 	} 
       
       // determine if merge is complete. remove and free data. 
-      if (m_next[RIGHT] == -1 || (get_tuple(RIGHT) && compare(m_tuple[RIGHT], t)))
+      if (m_next[RIGHT] == -1 || (get_tuple(RIGHT) && compare(t, m_tuple[RIGHT], 1) != 0))
 	{
-	  std::for_each(m_merge_stack.begin(), m_merge_stack.end(), free); // TODO: can i do this
+	  std::for_each(m_merge_stack.begin(), m_merge_stack.end(), free); // free valid in gnu++
 	  m_merge_stack.clear();
 	  m_merge_with = 0;
 	  break;
@@ -236,7 +235,7 @@ bool MergeJoin::moveNext()
       // grab the current tuple. 
       int comparison = 0;
       while (m_next[LEFT] != -1 && get_tuple(LEFT) &&
-	     (comparison = compare(m_tuple[LEFT], m_tuple[RIGHT])) < 0)
+	     (comparison = compare(m_tuple[LEFT], m_tuple[RIGHT], 1)) < 0)
 	{
 	  // retrieve the next tuple if available.
 	  // determine if we reached the end of current page.
@@ -253,14 +252,15 @@ bool MergeJoin::moveNext()
 	  create_merge_stack();
 	  available -= merge(available); // merge tuples from right branch with rewind stack. 
 
-	  if (m_next[RIGHT] == -1) // determine if we have reached at eof for right branch
+	  // determine if we have reached at eof for right branch
+	  if (m_next[RIGHT] == -1 || available < rsize) 
 	    {
 	      break; // terminate loop eof from right branch
 	    }
 	}
 
       while (m_next[LEFT] != -1 && get_tuple(RIGHT) &&
-	     compare(m_tuple[LEFT], m_tuple[RIGHT]) > 0)
+	     compare(m_tuple[LEFT], m_tuple[RIGHT], 1) > 0)
 	{
 	  // reached end of current buffer. 
 	  if (++m_next[RIGHT] >= m_inBuffer[RIGHT]->getSize())

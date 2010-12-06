@@ -20,13 +20,14 @@ SRC = Application.cpp \
 	PageLayout.cpp \
 	DataCreator.cpp \
 	MergeJoin.cpp \
-	Query.cpp
-
-debug:
-	g++ -g -o dbl -O0 $(SRC) 
+	Query.cpp \
+	Database.cpp
 
 release:
 	g++ -o dblite -O3 -funroll-loops $(SRC) 
+
+debug:
+	g++ -g -o dbl -O0 $(SRC) 
 
 clean:
 	rm -rf *.o *~ *.out *.exe *.prog

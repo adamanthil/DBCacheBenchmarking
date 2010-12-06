@@ -15,6 +15,7 @@ WhereClause::WhereClause(BooleanExpression & expression,
 
   for (int i = 0; i < variables.size(); i++)
     {
+      std::cerr << "searching..";
       /* set location of the data */
       variables[i]->data(&m_tuple);
 
@@ -25,6 +26,7 @@ WhereClause::WhereClause(BooleanExpression & expression,
 	{
 	  if (schema->at(j)->id() == attribute->id())
 	    {
+	      std::cerr << "found " << i << " of " << variables.size() << std::endl;
 	      variables[i]->attribute(schema->at(j));
 	      break;
 	    }

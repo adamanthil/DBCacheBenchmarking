@@ -26,7 +26,7 @@ void Query::profile()
 
 void Query::stats(std::ostream & strm)
 {
-  strm << m_id << ": " << m_nrecords << ", " << m_nrecords << ", "
+  strm << m_id << ": " << m_nrecords << ", " << m_nfetches << ", "
        << m_stime << ", " << m_etime << ", " << m_duration << std::endl;
 }
 
