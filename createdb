@@ -10,4 +10,9 @@ string|1|135
 string|32|136
 int|range|0|100|0|0|168
 string|28|172
+testTable2.tab
+3|200000|20
+int|incr|0
+fk|0|100000|2250|6721|4
+string|12|8
 

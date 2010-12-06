@@ -14,5 +14,12 @@
         <attribute id="9" name="j" type="STRING" length="28" />
       </schema>
     </table>
+    <table>
+      <schema>
+        <attribute id="0" name="a" type="INTEGER" length="4" />
+        <attribute id="1" name="b" type="INTEGER" length="4" />
+        <attribute id="2" name="c" type="STRING" length="12" />
+      </schema>
+    </table>
   </tables>
 </database>
