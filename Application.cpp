@@ -28,85 +28,86 @@ void SelectAll(const Table & table)
 {
   ProjectionList columns;
 
-  //  for (int i = 0; i < schema.nitems() / 2; i++)
-  Schema schema;
-  if (table.id() == 0)
+  for (int i = 0; i < table.schema()->nitems(); i++)
     {
-      schema.add(table.schema()->at(0));
-      schema.add(table.schema()->at(8));
-      
-      columns.push_back(schema[0]);
-      columns.push_back(schema[1]);
+      columns.push_back(table.schema()->at(i));
     }
-  if (table.id() == 1)
-    {
-      schema.add(table.schema()->at(1));
-      schema.add(table.schema()->at(2));
 
-      columns.push_back(schema[0]);
-      columns.push_back(schema[1]);
-    }
-  
-  //columns.push_back(schema[3]);
-
-  IRelationalOperator * scan = new SequentialScan(table.path(), &schema);
+  IRelationalOperator * scan = new SequentialScan(table.path(), table.schema());
   IRelationalOperator * proj = new Projection(scan, columns);
 
-  //proj->dump(std::cout);
-  
-  Query q(1, proj);
+  proj->dump(std::cout);
 
-  std::cerr << "started select all: ";
-  q.profile();
-  q.stats(std::cout);
-  
+  /*
+    Query q(1, proj);
+      
+      std::cerr << "started select all: ";
+      q.profile();
+      q.stats(std::cout);
+  */
 }
 
-void LoopJoin(Table & table1, Table & table2) 
+void ProjectionFilter(const Table & table)
 {
-	int joinCol1 = 0;
-	int joinCol2 = 0;
-	
-	BooleanExpression bexp(1);
-	
-	IntVariable r1(table1.schema()->at(joinCol1), INTEGER);
-	IntVariable r2(table2.schema()->at(joinCol2), INTEGER);
-	BooleanFactor<int> f(r1, EQ, r2);
-	BooleanTerm t;
-	
-	t.factor(&f);
-	
-	bexp.term(0,&t);
-	
-	SelectionList filter[2];
-	filter[0].push_back(table1.schema()->at(joinCol1));
-	filter[1].push_back(table1.schema()->at(joinCol2));
-	
-	std::vector<IVariableOperand *> variables[2];
-	
-	variables[0].push_back(&r1);
-	variables[1].push_back(&r2);
-	
-	JoinClause joinClause(bexp, filter, variables);
-	
-	IRelationalOperator * scan1 = new SequentialScan(table1.path(), table1.schema());
-	IRelationalOperator * scan2 = new SequentialScan(table2.path(), table2.schema());
-	IRelationalOperator * loopJoin = new NestedBlockJoin(scan1, scan2, &joinClause);
-	
-	ProjectionList columns;
-	for (int i = 0; i < loopJoin->schema()->nitems(); i++)
-	{
-		columns.push_back(loopJoin->schema()->at(i));
-	}
-	
-	IRelationalOperator * projection = new Projection(loopJoin, columns);
-	projection->dump(std::cout);
+  ProjectionList columns;
+  columns.push_back(table.schema()->at(0));
+  columns.push_back(table.schema()->at(1));
+  columns.push_back(table.schema()->at(8));
 
-	delete projection;
+  IRelationalOperator * scan = new SequentialScan(table.path(), table.schema());
+  IRelationalOperator * proj = new Projection(scan, columns);
+
+  proj->dump(std::cout);
+}
+
+void LoopJoin(const Table & table1, const Table & table2) 
+{
+  /*
+  int joinCol1 = 0;
+  int joinCol2 = 0;
+	
+  BooleanExpression bexp(1);
+	
+  IntVariable r1(table1.schema()->at(joinCol1), INTEGER);
+  IntVariable r2(table2.schema()->at(joinCol2), INTEGER);
+  BooleanFactor<int> f(r1, EQ, r2);
+  BooleanTerm t;
+	
+  t.factor(&f);
+	
+  bexp.term(0,&t);
+	
+  SelectionList filter[2];
+  filter[0].push_back(table1.schema()->at(joinCol1));
+  filter[1].push_back(table1.schema()->at(joinCol2));
+	
+  std::vector<IVariableOperand *> variables[2];
+	
+  variables[0].push_back(&r1);
+  variables[1].push_back(&r2);
+	
+  JoinClause joinClause(bexp, filter, variables);
+	
+  IRelationalOperator * scan1 = new SequentialScan(table1.path(), table1.schema());
+  IRelationalOperator * scan2 = new SequentialScan(table2.path(), table2.schema());
+  IRelationalOperator * loopJoin = new NestedBlockJoin(scan1, scan2, &joinClause);
+	
+  ProjectionList columns;
+  for (int i = 0; i < loopJoin->schema()->nitems(); i++)
+    {
+      columns.push_back(loopJoin->schema()->at(i));
+    }
+	
+  IRelationalOperator * projection = new Projection(loopJoin, columns);
+  projection->dump(std::cout);
+
+  delete projection;
+  */
 }
 
 void CartesianJoin(const Table & table1, const Table & table2) 
 {
+  /*
   IRelationalOperator * scan1 = new SequentialScan(table1.path(), table1.schema());
   IRelationalOperator * scan2 = new SequentialScan(table2.path(), table2.schema());
   IRelationalOperator * loopJoin = new NestedBlockJoin(scan1, scan2, NULL);
@@ -121,11 +122,13 @@ void CartesianJoin(const Table & table1, const Table & table2)
   projection->dump(std::cout);
   
   delete projection;
+  */
 }
 
 void EquiJoin(const Table & t1, const Table & t2)
 {
 
+  /*
   ProjectionList columns;
 
   Schema scan1Schema;
@@ -151,7 +154,7 @@ void EquiJoin(const Table & t1, const Table & t2)
   Query q(1, projection);
   q.profile();
   q.stats(std::cout);
-  
+  */
   /*
   projection->dump(std::cout);
 
@@ -162,6 +165,7 @@ void EquiJoin(const Table & t1, const Table & t2)
 void SelectWhere(const Table & tbl)
 {
  
+  /*
   ProjectionList columns;
   SelectionList filter;
 
@@ -207,7 +211,7 @@ void SelectWhere(const Table & tbl)
   // delete proj;
 
    proj->dump(std::cout, '|', '\n');
-  
+  */
 }
 
 int main(int argc, char ** argv)
@@ -215,41 +219,27 @@ int main(int argc, char ** argv)
   Schema schema;
   Schema projection;
   
-/*
-  DataCreator::CreateDB("createdb1", false);
-
-  BufferManager::Initialize();
-  FileManager::Initialize("config2", "db2.xml");
-
-  FileManager * fm = FileManager::getInstance();
-  Table * t = fm->getTable("test1");
-  //Table * t0 = fm->getTable("test2");
-  
-  SelectAll(*t, *t->schema());
-  //SelectAll(*t0, *t0->schema());
-  //  SelectWhere(*t);
-
-  LoopJoin(*t,*t);
-  //EquiJoin(*t, *t0);
-*/
-  std::cerr << "initializing..." << std::endl;
+  std::cerr << "initializing...";
   //DataCreator::CreateDB("createdb", false);
-  std::cerr << "done 1" << std::endl;
+  
   BufferManager::Initialize(4096);
-  std::cerr << "done 2" << std::endl;
-  Database * db = Database::getInstance();
   FileManager::Initialize(argv[1], "db.xml");
-  std::cerr << "done yes" << std::endl;
+  Database::Initialize("db.xml");
+  Database * db = Database::getInstance();
+  
+  std::cerr << "complete" << std::endl;
 
   const Table * t = db->table("test1");
   const Table * t0 = db->table("test2");
   
-  //SelectAll(*t);
+  // SelectAll(*t);
+  ProjectionFilter(*t);
   //SelectAll(*t0);
   //SelectWhere(*t);
 
   //CartesianJoin(*t,*t0);
-  EquiJoin(*t, *t0);
+  //EquiJoin(*t, *t0);
+  //LoopJoin(*t,*t);
 
 }
 

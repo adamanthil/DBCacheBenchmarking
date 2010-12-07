@@ -21,14 +21,19 @@ class Tuple
   void schema(const Schema * schema);
   const Schema * schema() const;
 
+  void value(int * buffer, const std::string & column) const;
+  void value(char * buffer, const std::string & column) const;
+
   void value(int * buffer, const Attribute & attribute) const;
   void value(char * buffer, const Attribute & attribute) const;
 
   void map(const Tuple * other);
+  //void extract(byte * data, ProjectionList & items);
 
   void dump(std::ostream & strm, char fs = '|', char rs = '\n') const;
  private:
-  void value(void * buffer, size_t length, const Attribute & attribute) const;
+  void value(void * buffer, const Attribute & attribute) const;
+  void value(void * buffer, const std::string & column) const;
 };
 
 #endif

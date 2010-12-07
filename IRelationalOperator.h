@@ -1,11 +1,14 @@
 #ifndef I_RELATIONAL_OPERATOR_H_
 #define I_RELATIONAL_OPERATOR_H_
 
-#include <iostream>
+#include <vector>
 #include <fstream>
 
 #include "MemoryBlock.h"
 #include "Schema.h"
+
+typedef std::vector<const Attribute *> ColumnList;
+typedef std::vector<const Attribute *> ProjectionList;
 
 // Interface for Relational Operators (eg SequentialScan, Joins, Projection, etc)
 // Responsible for deleting any children IRelationalOperators

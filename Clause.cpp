@@ -15,22 +15,8 @@ WhereClause::WhereClause(BooleanExpression & expression,
 
   for (int i = 0; i < variables.size(); i++)
     {
-      std::cerr << "searching..";
       /* set location of the data */
       variables[i]->data(&m_tuple);
-
-      /* TODO: must be a better way todo this */
-      /* update variable attribute references */
-      const Attribute * attribute = variables[i]->attribute();
-      for (int j = 0; j < schema->nitems(); j++)
-	{
-	  if (schema->at(j)->id() == attribute->id())
-	    {
-	      std::cerr << "found " << i << " of " << variables.size() << std::endl;
-	      variables[i]->attribute(schema->at(j));
-	      break;
-	    }
-	}
     }
 }
 
@@ -60,39 +46,33 @@ JoinClause::JoinClause(BooleanExpression & exp, SelectionList items[],
   : m_expression(exp) 
 {
 	
-	for(int i = 0; i < 2; i++) {
-		Schema * schema = new Schema();
-		for(int j = 0; j < items[i].size(); j++) {
-			schema->add(items[i].at(j));
-		}
-		m_tuple[i].m_data = NULL;
-		m_tuple[i].schema(schema);
-		m_items[i] = items[i];
-		
-		for (int j = 0; j < variables[i].size(); j++)
-		    {
-		      /* set location of the data */
-		      variables[i].at(j)->data(&m_tuple[i]);
+  for(int i = 0; i < 2; i++) 
+    {
+      Schema * schema = new Schema();
 
-		      /* TODO: must be a better way todo this */
-		      /* update variable attribute references */
-		      const Attribute * attribute = variables[i].at(j)->attribute();
-		      for (int k = 0; k < schema->nitems(); k++)
-			{
-			  if (schema->at(k)->id() == attribute->id())
-			    {
-			      variables[i].at(j)->attribute(schema->at(k));
-			      break;
-			    }
-			}
-		}
-	} 
+      m_tuple[i].m_data = NULL;
+      m_tuple[i].schema(schema);
+      m_items[i] = items[i];
+      
+      for(int j = 0; j < items[i].size(); j++) 
+	{
+	  schema->add(items[i].at(j));
+	}
+      
+      for (int j = 0; j < variables[i].size(); j++)
+	{
+	  /* set location of the data */
+	  variables[i].at(j)->data(&m_tuple[i]);	  
+	}
+    }
 }
 
-JoinClause::~JoinClause() {
-	for(int i = 0; i < 2; i++) {
-		delete m_tuple[i].schema();
-	}
+JoinClause::~JoinClause() 
+{
+  for(int i = 0; i < 2; i++) 
+    {
+      delete m_tuple[i].schema();
+    }
 }
 
 const Schema * JoinClause::schema(int branch) const
@@ -109,5 +89,5 @@ bool JoinClause::evaluate(const Tuple & t0, const Tuple & t1)
 
 const SelectionList & JoinClause::filter(int branch) const 
 {
-	return m_items[branch];
+  return m_items[branch];
 }
