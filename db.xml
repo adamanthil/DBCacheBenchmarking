@@ -1,6 +1,6 @@
 <database>
   <tables>
-    <table id="0" name="test1" path="Data/testTable1.tab">
+    <table id="0" name="T1" path="Data/testTable1.tab">
       <schema>
         <attribute id="0" name="a" type="INTEGER" length="4" />
 	<attribute id="1" name="b" type="INTEGER" length="4" />
@@ -14,14 +14,14 @@
         <attribute id="9" name="j" type="STRING" length="28" />
       </schema>
     </table>
-    <table id="1" name="test2" path="Data/testTable2.tab">
+    <table id="1" name="T2" path="Data/testTable2.tab">
       <schema>
         <attribute id="0" name="a" type="INTEGER" length="4" />
         <attribute id="1" name="b" type="INTEGER" length="4" />
         <attribute id="2" name="c" type="STRING" length="12" />
       </schema>
     </table>
-    <table id="0" name="test1" path="Data/testTable1.tab">
+    <table id="0" name="T3" path="Data/testTable3.tab">
       <schema>
         <attribute id="0" name="a" type="INTEGER" length="4" />
 	<attribute id="1" name="b" type="INTEGER" length="4" />

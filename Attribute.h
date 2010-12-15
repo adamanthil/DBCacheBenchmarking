@@ -23,8 +23,8 @@ private:
   size_t m_size;
   field_type_t m_type;
 public:
-  Attribute(int id, int position, std::string name, std::string table, 
-	    size_t size, field_type_t type);
+  Attribute(int id, int position, const std::string & name, 
+	    const std::string & table, size_t size, field_type_t type);
 
   int id() const;
   int position() const;
@@ -35,6 +35,7 @@ public:
   field_type_t type() const;
 
   static field_type_t type(const std::string &);
+  static const char * description(field_type_t type);
 };
 
 #endif

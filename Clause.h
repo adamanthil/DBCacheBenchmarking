@@ -11,17 +11,12 @@ typedef std::vector<const Attribute *> SelectionList;
 class WhereClause
 {
  private:
-  BooleanExpression & m_expression;
-  SelectionList & m_items;
+  BooleanExpression * m_expression;
   Tuple m_tuple;
  public:
-  WhereClause(BooleanExpression &, SelectionList & items, 
-	      std::vector<IVariableOperand *> &);
+  WhereClause(BooleanExpression * expression);
   ~WhereClause();
-
   bool evaluate(const Tuple & tuple);
-  const SelectionList & filter() const;
-  const Schema * schema() const;
 };
 
 class JoinClause

@@ -7,12 +7,22 @@ Schema::Schema() :
 {
 }
 
+Schema::Schema(const std::vector<const Attribute *> * columns) 
+  :  m_size(0)
+{
+  reserve(columns->size());
+  std::vector<const Attribute *>::const_iterator i = columns->begin();
+  for ( ;  i != columns->end(); i++)
+    {
+      add(*i);
+    }
+}
+
 Schema::~Schema()
 {
   std::for_each(begin(), end(), free);
 }
 
-// TODO: update offset calculations. 
 void Schema::add(const Attribute * a)
 {
   Attribute * attribute = 
@@ -22,6 +32,11 @@ void Schema::add(const Attribute * a)
   
   m_offset[attribute->qualified_name()] = m_size;
   m_size += attribute->size();
+}
+
+bool Schema::contains(const std::string & name) const
+{
+  return m_offset.find(name) != m_offset.end();
 }
 
 int Schema::offset(const Attribute * attribute) const
@@ -62,7 +77,7 @@ const Attribute * Schema::operator[](const std::string & name) const
 
   for (int i = 0; i < size(); i++)
     {
-      if (name == (attribute = at(i))->name() || // TODO: 
+      if (name == (attribute = at(i))->name() || // TODO: will use only q-name
 	  name == attribute->qualified_name())
 	{
 	  return attribute;

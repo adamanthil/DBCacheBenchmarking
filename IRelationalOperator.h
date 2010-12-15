@@ -8,7 +8,6 @@
 #include "Schema.h"
 
 typedef std::vector<const Attribute *> ColumnList;
-typedef std::vector<const Attribute *> ProjectionList;
 
 // Interface for Relational Operators (eg SequentialScan, Joins, Projection, etc)
 // Responsible for deleting any children IRelationalOperators

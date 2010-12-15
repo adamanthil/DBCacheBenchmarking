@@ -79,7 +79,7 @@ void Tuple::dump(std::ostream & output, char fs, char rs) const
 	  output << *(int *)(m_data + offset);
 	  break;
 	case STRING:
-	  memset(buffer, 0, m_schema->rsize());
+	  memset(buffer, 0, m_schema->rsize() + 1);
 	  memcpy(buffer, m_data + offset, attribute->size());
 	  output << buffer;
 	  break;

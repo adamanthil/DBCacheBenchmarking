@@ -18,6 +18,8 @@ class Database
   const Table * table(int tid) const;
   const void table(Table * table);
 
+  const Tables & tables() const;
+
   static void Initialize(std::string filename = "db.xml");
   static Database * getInstance();
  private:

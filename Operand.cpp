@@ -6,6 +6,12 @@ template<> int VariableOperand<int>::value()
   return *(int *)m_buffer;
 }
 
+template<> char VariableOperand<char>::value()
+{
+  m_tuple->value((char *)m_buffer, m_name);
+  return *(char *)m_buffer;
+}
+
 template<> const char * VariableOperand<const char *>::value()
 {
   memset(m_buffer, 0, m_size);

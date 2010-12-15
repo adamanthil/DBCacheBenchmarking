@@ -100,3 +100,8 @@ const Table * Database::table(const std::string & table) const
 
   return NULL;
 }
+
+const Tables & Database::tables() const
+{
+  return m_tables;
+}

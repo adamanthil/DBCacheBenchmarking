@@ -5,24 +5,24 @@
 #include "Tuple.h"
 
 Projection::Projection(IRelationalOperator * child, ProjectionList & columns) 
-  : m_consumed(true), m_next(0), m_columns(columns)
+  : m_consumed(true), m_next(0), m_child(child)
 {
 
   m_schema = new Schema();
-  for (int i = 0; i < m_columns.size(); i++)
+  for (int i = 0; i < columns.count(); i++)
     {
-      m_schema->add(m_columns[i]);
+      const Column * column = columns[i];
+      std::string c = column->m_table + "." + column->m_name;
+      m_schema->add((*m_child->schema())[c]);
     }
   m_rsize = m_schema->rsize();
-
-  m_child = child;
- 
-  for (int i = 0; i < sizeof(m_buffer) / sizeof(m_buffer[0]); i++)
-    m_buffer[i] = BufferManager::getInstance()->allocate();
 
   m_tuple.schema(m_child->schema());
   m_tuple.m_data = new byte[m_child->schema()->rsize()];
   m_data = new byte[m_rsize];
+
+  for (int i = 0; i < sizeof(m_buffer) / sizeof(m_buffer[0]); i++)
+    m_buffer[i] = BufferManager::getInstance()->allocate();
 }
 
 Projection::~Projection()
@@ -66,9 +66,9 @@ bool Projection::moveNext()
 
 	  // extract projected data.
 	  int to = 0;
-	  for (int i = 0; i < m_columns.size(); i++)
+	  for (int i = 0; i < m_schema->nitems(); i++)
 	    {
-	      const Attribute * attribute = m_columns[i];
+	      const Attribute * attribute = m_schema->at(i);
 	      m_tuple.value((char *)m_data + to, *attribute);
 	      to += attribute->size();
 	    }
@@ -108,7 +108,6 @@ void Projection::dump(std::ostream & stream, char fs, char rs)
   
   while (moveNext())
     { 
-      
       for (int i = 0; i < m_buffer[OUT]->getSize(); i++)
 	{
 	  m_buffer[OUT]->get(m_data, i * m_rsize, m_rsize);

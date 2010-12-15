@@ -1,44 +1,25 @@
 #include "Clause.h"
 
-WhereClause::WhereClause(BooleanExpression & expression, 
-			 SelectionList & items,
-			 std::vector<IVariableOperand *> & variables) :
-  m_expression(expression), m_items(items)
+WhereClause::WhereClause(BooleanExpression * expression) :
+  m_expression(expression)
 {
-
-  Schema * schema = new Schema();
-  for (int i = 0; i < items.size(); i++)
-    schema->add(items[i]);
-
-  m_tuple.m_data = NULL;
-  m_tuple.schema(schema);
-
-  for (int i = 0; i < variables.size(); i++)
+  for (int i = 0; i < m_expression->variables().size(); i++)
     {
       /* set location of the data */
-      variables[i]->data(&m_tuple);
+      m_expression->variables()[i]->data(&m_tuple);
     }
 }
 
 WhereClause::~WhereClause()
 {
-  delete m_tuple.schema();
-}
-
-const SelectionList & WhereClause::filter() const
-{
-  return m_items;
-}
-
-const Schema * WhereClause::schema() const
-{
-  return m_tuple.schema();
+  delete m_expression;
 }
 
 bool WhereClause::evaluate(const Tuple & t)
 {
+  m_tuple.schema(t.schema());
   m_tuple.m_data = t.m_data;
-  return m_expression.evaluate();
+  return m_expression->evaluate();
 }
 
 JoinClause::JoinClause(BooleanExpression & exp, SelectionList items[],

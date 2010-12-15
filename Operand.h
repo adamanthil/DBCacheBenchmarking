@@ -13,6 +13,7 @@ class IOperand
  public: 
   virtual T value() = 0;
   virtual int compareTo(IOperand<T> & other) = 0;
+  virtual Type type() = 0;
 };
 
 template<typename T>
@@ -41,14 +42,15 @@ class ConstantOperand : public Operand<T>
 class IVariableOperand
 {
  public: 
+  //virtual const std::string & name() const;
   virtual void data(const Tuple * t) = 0;
 };
 
 template<typename T>
-class VariableOperand : public Operand<T>, public IVariableOperand
+class VariableOperand : public IVariableOperand, public Operand<T>
 {
  private:
-  const std::string & m_name;
+  std::string m_name;
   size_t m_size;
   byte * m_buffer; // value buffer
 

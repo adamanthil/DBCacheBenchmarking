@@ -1,8 +1,10 @@
 #include <algorithm>
+#include <string.h>
 
 #include "MergeJoin.h"
 #include "BufferManager.h"
 
+/*
 MergeJoin::MergeJoin(IRelationalOperator * lChild, IRelationalOperator * rChild)
   : m_write_offset(0), m_merge_with(0), m_total(0)
 {
@@ -28,6 +30,55 @@ MergeJoin::MergeJoin(IRelationalOperator * lChild, IRelationalOperator * rChild)
   m_data = new byte[m_schema.rsize()];
   m_buffer = BufferManager::getInstance()->allocate();
 }
+*/
+
+MergeJoin::MergeJoin(IRelationalOperator * lChild, IRelationalOperator * rChild,
+		     const Columns & joinColumns)
+  : m_write_offset(0), m_merge_with(0), m_total(0)
+{
+  m_child[LEFT] = lChild;
+  m_child[RIGHT] = rChild;
+
+  /* create tuple schemas. */
+  for (int i = 0; i < N_BRANCHES; i++)
+    {
+      int idx = i * 2;
+      Schema * joinSchema = new Schema();
+
+      /* create projection schema */
+      m_tuple[idx|PROJ].schema(m_child[i]->schema());
+
+      /* create join schema */
+      m_tuple[idx|JOIN].schema(joinSchema);
+      for (int j = 0; j < joinColumns.count(); j++)
+	{
+	  const Column & column = joinColumns.at(i);
+	  std::string name = column.m_table + "." + column.m_name;
+	  if (m_tuple[idx].schema()->contains(name))
+	    {
+	      joinSchema->add((*(m_tuple[idx].schema()))[name]);
+	    }
+	}
+
+      m_tuple[idx|PROJ].m_data = new byte[m_tuple[idx].schema()->rsize()];
+      m_tuple[idx|JOIN].m_data = new byte[m_tuple[idx].schema()->rsize()];
+
+      m_consumed[i] = true;
+      m_inBuffer[i] = BufferManager::getInstance()->allocate();
+    }
+
+  /* create merged schema */
+  for (int i = 0; i < N_BRANCHES; i++)
+    {
+      for (int j = 0; j < m_tuple[i].schema()->nitems(); j++)
+	{
+	  m_schema.add(m_tuple[i].schema()->at(j));
+	}
+    }
+  
+  m_data = new byte[m_schema.rsize()];
+  m_buffer = BufferManager::getInstance()->allocate();
+}
 
 MergeJoin::~MergeJoin()
 {
@@ -36,8 +87,12 @@ MergeJoin::~MergeJoin()
   for (int i = 0; i < N_BRANCHES; i++)
     {
       delete m_child[LEFT];
-      delete [] m_tuple[i].m_data;
       bm->deallocate(m_inBuffer[i]);
+    }
+  
+  for (int i = 0; i < NCHILD_TUPLES; i++)
+    {
+      delete [] m_tuple[i].m_data;
     }
 
   bm->deallocate(m_buffer);
@@ -46,18 +101,38 @@ MergeJoin::~MergeJoin()
   std::for_each(m_merge_stack.begin(), m_merge_stack.end(), free);
 }
 
-int MergeJoin::compare(const Tuple & t0, const Tuple & t1, int fid)
+
+// TODO: pre-determine offsets and size values 
+// to speed up calculations. 
+int MergeJoin::compare(const Tuple & lhs, const Columns & lCols, 
+		       const Tuple & rhs, const Columns & rCols)
 {
-  const Attribute * l = t0.schema()->at(0);
-  const Attribute * r = t1.schema()->at(0); // TODO: hard-coded values. 
-
-  int a = 0;
-  int b = 0;
-
-  t0.value(&a, *l);
-  t1.value(&b, *r);
+  Column column[N_BRANCHES];
   
-  return a - b;
+  for (int i = 0; i < lCols.count(); i++)
+    {
+      column[LEFT] = lCols[i];
+      column[RIGHT] = rCols[i];
+      std::string lColumn = columns[LEFT].m_table + "." + 
+	columns[LEFT].m_name;
+      std::string rColumn = columns[RIGHT].m_table + "." + 
+	columns[RIGHT].m_name;
+      
+      const Attribute * attribute = (*lhs.schema())[lColumn];
+      
+      int lOffset = lhs.schema()->offset(lAttribute);
+      int rOffset = rhs.schema()->offset(rColumn);
+      
+      int cmp = memcmp(lhs.m_data + lOffset, rhs.m_data + rOffset,
+		       attribute->size());
+      
+      if (cmp != 0)
+	{
+	  return cmp;
+	}
+    }
+
+  return 0;
 }
 
 bool MergeJoin::hasData(int branch)
@@ -99,13 +174,13 @@ void MergeJoin::concatenate(Tuple & dst, const Tuple & s, const Tuple & t)
   */
 }
 
-bool MergeJoin::get_tuple(int branch)
+bool MergeJoin::get_tuple(int branch, int tidx)
 {
   if (m_next[branch] != -1 && m_next[branch] < m_inBuffer[branch]->getSize())
     {
-      m_inBuffer[branch]->get(m_tuple[branch].m_data, 
-			      m_next[branch] * m_tuple[branch].schema()->rsize(), 
-			      m_tuple[branch].schema()->rsize());
+      m_inBuffer[branch]->get(m_tuple[tidx].m_data, 
+			      m_next[branch] * m_tuple[tidx].schema()->rsize(), 
+			      m_tuple[tidx].schema()->rsize());
       return true;
     }
   return false;
@@ -117,19 +192,20 @@ void MergeJoin::create_merge_stack()
   Tuple t;
 
   t.schema(m_child[LEFT]->schema());
-  t.m_data = m_data;
+  t.m_data = m_data; // TODO: is this correct value of m_data
 
   m_merge_stack.clear();
 
   // get first item of merge stack for future comparisons.
-  m_inBuffer[LEFT]->get(m_data, m_next[LEFT] * m_tuple[LEFT].schema()->rsize(), 
-			m_tuple[LEFT].schema()->rsize());
+  m_inBuffer[LEFT]->get(m_data, m_next[LEFT] * m_tuple[TLEFT|PROJ].schema()->rsize(), 
+			m_tuple[TLEFT|PROJ].schema()->rsize());
   
-  while (get_tuple(LEFT) && compare(t, m_tuple[LEFT], 0) == 0)
+  while (get_tuple(LEFT, TLEFT|PROJ) && compare(t, m_joinCols[LEFT], m_tuple[TLEFT|PROJ], 
+					       m_joinCols[LEFT]) == 0)
     {
       // push item unto merge stack.
-      byte * data = new byte[m_tuple[LEFT].schema()->rsize()];
-      memcpy(data, m_tuple[LEFT].m_data, m_tuple[LEFT].schema()->rsize());
+      byte * data = new byte[m_tuple[TLEFT|PROJ].schema()->rsize()];
+      memcpy(data, m_tuple[LEFT].m_data, m_tuple[TLEFT|PROJ].schema()->rsize());
       m_merge_stack.push_back(data);
 
       if (++m_next[LEFT] >= m_inBuffer[LEFT]->getSize())
@@ -143,6 +219,8 @@ void MergeJoin::create_merge_stack()
 	  break;
 	}
     }
+
+  // TODO: update left-join tuple.
 }
 
 int MergeJoin::merge(size_t available)
@@ -167,10 +245,10 @@ int MergeJoin::merge(size_t available)
   t.schema(m_child[LEFT]->schema());
 
   while (m_next[RIGHT] != -1 && available >= rsize &&
-	 get_tuple(RIGHT))
+	 get_tuple(RIGHT, TRIGHT|PROJ))
     {
       // compare tuple from right branch with merge-stack. 
-      if (compare(t, m_tuple[RIGHT], 1) == 0)
+      if (compare(t, m_joinCols[LEFT], m_tuple[TRIGHT|PROJ], m_joinCols[RIGHT]) == 0)
 	{
 
 	  // merge item with all items on stack. 
@@ -201,7 +279,9 @@ int MergeJoin::merge(size_t available)
 	} 
       
       // determine if merge is complete. remove and free data. 
-      if (m_next[RIGHT] == -1 || (get_tuple(RIGHT) && compare(t, m_tuple[RIGHT], 1) != 0))
+      if (m_next[RIGHT] == -1 || (get_tuple(RIGHT, TRIGHT|PROJ) && 
+				  compare(t, m_joinCols[LEFT], 
+					  m_tuple[TRIGHT|PROJ], m_joinCols[RIGHT]) != 0))
 	{
 	  std::for_each(m_merge_stack.begin(), m_merge_stack.end(), free); // free valid in gnu++
 	  m_merge_stack.clear();
@@ -210,6 +290,8 @@ int MergeJoin::merge(size_t available)
 	}
     }
   m_buffer->setSize(nrecords + m_buffer->getSize());
+
+  //TODO: do we need to update right join tuple?? 
      
   return used;
 }
@@ -230,12 +312,13 @@ bool MergeJoin::moveNext()
       if (isEmpty(LEFT) || isEmpty(RIGHT))
 	break; // terminate loop;
 
-      get_tuple(RIGHT);
+      get_tuple(RIGHT, TRIGHT|JOIN);
 
       // grab the current tuple. 
       int comparison = 0;
-      while (m_next[LEFT] != -1 && get_tuple(LEFT) &&
-	     (comparison = compare(m_tuple[LEFT], m_tuple[RIGHT], 1)) < 0)
+      while (m_next[LEFT] != -1 && get_tuple(LEFT, TLEFT|JOIN) &&
+	     (comparison = compare(m_tuple[TLEFT|JOIN], m_joinCols[LEFT],
+				   m_tuple[TRIGHT|JOIN], m_joinCols[RIGHT])) < 0)
 	{
 	  // retrieve the next tuple if available.
 	  // determine if we reached the end of current page.
@@ -259,8 +342,9 @@ bool MergeJoin::moveNext()
 	    }
 	}
 
-      while (m_next[LEFT] != -1 && get_tuple(RIGHT) &&
-	     compare(m_tuple[LEFT], m_tuple[RIGHT], 1) > 0)
+      while (m_next[LEFT] != -1 && get_tuple(RIGHT, TRIGHT|JOIN) &&
+	     compare(m_tuple[TLEFT|JOIN], m_joinCols[LEFT],
+		     m_tuple[TRIGHT|JOIN], m_joinCols[RIGHT]) > 0)
 	{
 	  // reached end of current buffer. 
 	  if (++m_next[RIGHT] >= m_inBuffer[RIGHT]->getSize())

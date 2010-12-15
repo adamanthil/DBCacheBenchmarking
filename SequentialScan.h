@@ -4,9 +4,11 @@
 #include <vector>
 #include <string>
 
+#include "Table.h"
 #include "FileDescriptor.h"
 #include "IRelationalOperator.h"
 #include "Attribute.h"
+#include "Column.h"
 #include "MemoryBlock.h"
 #include "Clause.h"
 
@@ -14,19 +16,23 @@ class SequentialScan : public IRelationalOperator
 {
  private:
   FileDescriptor * m_fd;
-  MemoryBlock * m_buffer;
-  WhereClause * m_clause;
-  const Schema * m_schema;
-  byte * m_data;
+  DiskPage * m_page;
+  int m_rid;
 
-  byte * extract(byte *, const DiskPage *, int, const Schema *);
+  byte * m_data;
+  MemoryBlock * m_buffer;
+  Schema * m_schema;
+  WhereClause * m_clause;
+
+  Tuple m_tuple; // filtered tuple. 
   
  public:
-  SequentialScan(const std::string & filename,
-		 const Schema * schema);
-  SequentialScan(const std::string & filename, const Schema * schema,
-		 WhereClause * clause);
+
+  SequentialScan(const Table * relation, const std::string & alias,
+		 const Columns &);
   ~SequentialScan();
+
+  void filter(BooleanExpression * expression, const std::vector<std::string> & filterColumns);
 
   virtual const Schema * schema() const;
   virtual bool moveNext();

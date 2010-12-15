@@ -12,8 +12,10 @@ class Schema : private std::vector<Attribute *>
  private:
   size_t m_size;
   std::map<std::string, size_t> m_offset;
+  std::string m_relation;
  public:
   Schema();
+  Schema(const std::vector<const Attribute *> * columns);
   ~Schema();
 
   void add(const Attribute * attribute);
@@ -27,6 +29,8 @@ class Schema : private std::vector<Attribute *>
   const Attribute * operator[](const std::string &) const;
   const Attribute * operator[](int fid) const;
   const Attribute * at(int fid) const;
+
+  bool contains(const std::string &) const;
 };
 
 #endif

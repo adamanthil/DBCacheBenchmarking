@@ -2,8 +2,11 @@
 #define APPLICATION_H_
 
 #include <stdio.h>
+#include <string.h>
 #include <iostream>
 #include <new>
+
+#include "parser.h"
 
 #include "Database.h"
 #include "FileManager.h"
@@ -18,204 +21,133 @@
 #include "BooleanExpression.h"
 #include "DataCreator.h"
 
+using namespace lexer;
+
 typedef ConstantOperand<int> IntConstant;
 typedef ConstantOperand<const char *> StringConstant;
 
 typedef VariableOperand<int> IntVariable;
 typedef VariableOperand<const char *> StringVariable;
 
-void SelectAll(const Table & table)
+void query(const std::string & query)
 {
-  ProjectionList columns;
+  Parser p;
+  IRelationalOperator * op = p.parse(query);
 
-  for (int i = 0; i < table.schema()->nitems(); i++)
-    {
-      columns.push_back(table.schema()->at(i));
-    }
-
-  IRelationalOperator * scan = new SequentialScan(table.path(), table.schema());
-  IRelationalOperator * proj = new Projection(scan, columns);
-
-  proj->dump(std::cout);
-
-  /*
-    Query q(1, proj);
-      
-      std::cerr << "started select all: ";
-      q.profile();
-      q.stats(std::cout);
-  */
+  op->dump(std::cout);
+  delete op;
 }
 
 void ProjectionFilter(const Table & table)
 {
-  ProjectionList columns;
-  columns.push_back(table.schema()->at(0));
-  columns.push_back(table.schema()->at(1));
-  columns.push_back(table.schema()->at(8));
-
-  IRelationalOperator * scan = new SequentialScan(table.path(), table.schema());
-  IRelationalOperator * proj = new Projection(scan, columns);
-
-  proj->dump(std::cout);
 }
 
 void LoopJoin(const Table & table1, const Table & table2) 
 {
-  /*
-  int joinCol1 = 0;
-  int joinCol2 = 0;
-	
-  BooleanExpression bexp(1);
-	
-  IntVariable r1(table1.schema()->at(joinCol1), INTEGER);
-  IntVariable r2(table2.schema()->at(joinCol2), INTEGER);
-  BooleanFactor<int> f(r1, EQ, r2);
-  BooleanTerm t;
-	
-  t.factor(&f);
-	
-  bexp.term(0,&t);
-	
-  SelectionList filter[2];
-  filter[0].push_back(table1.schema()->at(joinCol1));
-  filter[1].push_back(table1.schema()->at(joinCol2));
-	
-  std::vector<IVariableOperand *> variables[2];
-	
-  variables[0].push_back(&r1);
-  variables[1].push_back(&r2);
-	
-  JoinClause joinClause(bexp, filter, variables);
-	
-  IRelationalOperator * scan1 = new SequentialScan(table1.path(), table1.schema());
-  IRelationalOperator * scan2 = new SequentialScan(table2.path(), table2.schema());
-  IRelationalOperator * loopJoin = new NestedBlockJoin(scan1, scan2, &joinClause);
-	
-  ProjectionList columns;
-  for (int i = 0; i < loopJoin->schema()->nitems(); i++)
-    {
-      columns.push_back(loopJoin->schema()->at(i));
-    }
-	
-  IRelationalOperator * projection = new Projection(loopJoin, columns);
-  projection->dump(std::cout);
-
-  delete projection;
-  */
 }
 
 void CartesianJoin(const Table & table1, const Table & table2) 
 {
-  /*
-  IRelationalOperator * scan1 = new SequentialScan(table1.path(), table1.schema());
-  IRelationalOperator * scan2 = new SequentialScan(table2.path(), table2.schema());
-  IRelationalOperator * loopJoin = new NestedBlockJoin(scan1, scan2, NULL);
-  
-  ProjectionList columns;
-  for (int i = 0; i < loopJoin->schema()->nitems(); i++)
-    {
-      columns.push_back(loopJoin->schema()->at(i));
-    }
-  
-  IRelationalOperator * projection = new Projection(loopJoin, columns);
-  projection->dump(std::cout);
-  
-  delete projection;
-  */
 }
 
 void EquiJoin(const Table & t1, const Table & t2)
 {
-
-  /*
-  ProjectionList columns;
-
-  Schema scan1Schema;
-  scan1Schema.add(t1.schema()->at(0));
-  scan1Schema.add(t1.schema()->at(8));
-
-  Schema scan2Schema;
-  scan2Schema.add(t2.schema()->at(1));
-  scan2Schema.add(t2.schema()->at(2));
-
-  IRelationalOperator * scan1 = new SequentialScan(t1.path(), &scan1Schema);
-  IRelationalOperator * scan2 = new SequentialScan(t2.path(), &scan2Schema);
-  IRelationalOperator * join = new MergeJoin(scan1, scan2);
-
-  for (int i = 0; i < join->schema()->nitems(); i++)
-    {
-      if (i != 2)
-      columns.push_back(join->schema()->at(i));
-    }  
-
-  IRelationalOperator * projection = new Projection(join, columns);
-
-  Query q(1, projection);
-  q.profile();
-  q.stats(std::cout);
-  */
-  /*
-  projection->dump(std::cout);
-
-  delete projection;
-  */
 }
 
 void SelectWhere(const Table & tbl)
 {
- 
-  /*
-  ProjectionList columns;
-  SelectionList filter;
-
-  filter.push_back(tbl.schema()->at(8));
-  //  filter.push_back(tbl.schema()->at(9));
-
-  columns.push_back(tbl.schema()->at(0));
-  columns.push_back(tbl.schema()->at(8));
-
-  IntConstant l(25, INTEGER);
-  IntVariable r(tbl.schema()->at(8), INTEGER);
-
-  IntConstant l1(63, INTEGER);
-  IntVariable r1(tbl.schema()->at(8), INTEGER);
-
-  BooleanFactor<int> f(r, GE, l);
-  BooleanFactor<int> f1(r1, LE, l1);
-  BooleanTerm t;
-
-  BooleanExpression exp(1);
-
-  t.factor(&f);
-  t.factor(&f1);
-  exp.term(0, &t);
-  //exp.term(1, &t1);
-
-  std::vector<IVariableOperand *> vars;
-  vars.push_back(&r);
-  vars.push_back(&r1);
-
-  WhereClause clause(exp, filter, vars);
-
-  IRelationalOperator * scan = 
-    new SequentialScan(tbl.path(), tbl.schema(), &clause);
-  IRelationalOperator * proj = new Projection(scan, columns);
-
-  Query q(1, proj);
-
-  std::cerr << "started select where: ";
-  //q.profile();
-  //q.stats(std::cout);
-
-  // delete proj;
-
-   proj->dump(std::cout, '|', '\n');
-  */
 }
+
+void imode()
+{
+  std::string cmd;
+  std::string history;
+
+  Database * db = Database::getInstance();
+
+  std::cout << "> ";
+  std::cout.flush();
+
+  std::cin >> cmd;
+  while (cmd != "quit" && cmd != "exit")
+    {
+      if (cmd == "tables")
+	{
+	  const std::vector<Table *> & tables = db->tables();
+	  for (int i = 0; i < tables.size(); i++)
+	    {
+	      std::cout << tables.at(i)->name() << std::endl;
+	    }
+	}
+      else if (cmd == "describe")
+	{
+	  std::string tbl;
+	  std::cin >> tbl; 
+
+	  if (tbl != "" && db->table(tbl))
+	    {
+	      const Table * table = db->table(tbl);
+	      const Schema * schema = table->schema();
+	      
+	      std::cout << "column\ttype\t\tsize"
+			<< std::endl
+			<< "======\t====\t\t===="
+			<< std::endl;
+
+	      for (int i = 0; i < schema->nitems(); i++)
+		{
+		  const Attribute * attribute = schema->at(i);
+		  std::cout << attribute->name() << "\t" << Attribute::description(attribute->type()) 
+			    << "\t\t" << attribute->size() << std::endl;
+		}
+	    }
+	  else
+	    {
+	      std::cout << "invalid table name. type 'tables' for list of tables" << std::endl;
+	    }
+	}
+      else if (cmd == "query")
+	{
+	  std::string q;
+	  getline(std::cin, q);
+	  query(q);
+	}
+      else if (cmd == "help")
+	{
+	  std::cout << "display usage" << std::endl;
+	}
+      else
+	{
+	  std::cout << "unknown command" << std::endl
+		    << "type help for usage" << std::endl;
+	}
+
+      std::cout << "> ";
+      std::cout.flush();
+
+      history = cmd;
+      std::cin >> cmd;
+    }
+}
+
+void initialize(const char * db = "db.xml", const char * files = "config")
+{
+  std::cout << "initializing..."; std::cout.flush();
+  BufferManager::Initialize();
+  std::cout << "loading database info..."; std::cout.flush();
+  Database::Initialize(db);
+  std::cout << "loading relations..."; std::cout.flush();
+  FileManager::Initialize(files);
+  std::cout << "done" << std::endl;
+};
 
 int main(int argc, char ** argv)
 {
+
+  initialize();
+  imode();
+
+  /*
   Schema schema;
   Schema projection;
   
@@ -240,7 +172,7 @@ int main(int argc, char ** argv)
   //CartesianJoin(*t,*t0);
   //EquiJoin(*t, *t0);
   //LoopJoin(*t,*t);
-
+  */
 }
 
 #endif
