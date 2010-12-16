@@ -25,6 +25,7 @@ void TupleStreamWriter::discard()
 {
   m_nRecs = 0;
   m_pos = 0;
+  m_block.clear();
 }
 
 bool TupleStreamWriter::isStreamFull()
@@ -48,9 +49,7 @@ void TupleStreamWriter::write(Tuple & t)
       int fieldLoc = part->getFLoc(fName);
       int fSize = a->size();
       int offset = partitionStart + partitionByte*m_nRecs + fieldLoc;
-      char * fVal = new char[fSize];
-      t.value(fVal,*a);
-      m_block.put((byte*)fVal, offset, fSize);
+      m_block.put(t.m_data+t.schema()->offset(a), offset, fSize);
     }
   }
   else
@@ -62,11 +61,12 @@ void TupleStreamWriter::write(Tuple & t)
       int fSize = a->size();
       char * fVal = new char[fSize];
       t.value(fVal,*a);
-      int p = a->position();
+      int p = atts->offset(a);
       int offset = totalNumBytes*m_nRecs + p;
       m_block.put((byte*)fVal, offset, fSize);
     }
   }
   m_pos += m_record_size;
   m_nRecs++;
+  m_block.setSize(m_nRecs);
 }

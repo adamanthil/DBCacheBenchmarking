@@ -19,10 +19,12 @@ class TupleStreamReader
   ~TupleStreamReader();
   void layout(const MaterializationLayout * layout);
 
+  void peek(Tuple & t);
   void read(Tuple & t);
-  bool isEndOfStream();
 
-  void reset();
+  void rewind(int back);
+  bool isEndOfStream();
+  void reset(); 
 };
 
 #endif

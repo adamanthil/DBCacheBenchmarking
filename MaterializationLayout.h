@@ -2,6 +2,7 @@
 #define MATERIALIZATION_LAYOUT_H_
 
 #include <map>
+#include <vector>
 #include "Partition.h"
 #include "Schema.h"
 
@@ -17,7 +18,7 @@ class MaterializationLayout
  public:
   MaterializationLayout(int n_partitions, size_t capacity, size_t recordSize);
   ~MaterializationLayout();
-  void add(Schema * atts);
+  void add(const std::vector<const Attribute *> & atts);
   Partition * getPartition(std::string column) const;
 };
 

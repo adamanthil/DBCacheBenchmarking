@@ -7,8 +7,9 @@
 #include "IRelationalOperator.h"
 #include "Schema.h"
 #include "Tuple.h"
+#include "Column.h"
 
-typedef std::vector<const Attribute *> ProjectionList;
+typedef Columns ProjectionList;
 
 class Projection : public IRelationalOperator
 {
@@ -24,7 +25,6 @@ class Projection : public IRelationalOperator
 
   MemoryBlock * m_buffer[2];
   IRelationalOperator * m_child;
-  ProjectionList & m_columns;
 
   Tuple m_tuple;
   byte * m_data;
@@ -39,6 +39,8 @@ class Projection : public IRelationalOperator
   virtual void reset() {}
   virtual void dump(std::ostream & strm,
 		    char fs = '|', char rs = '\n');
+
+  virtual void layout(const MaterializationLayout *) { }
 };
 
 #endif

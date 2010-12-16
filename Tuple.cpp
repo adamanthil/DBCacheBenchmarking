@@ -19,19 +19,33 @@ const Schema * Tuple::schema() const
 
 void Tuple::value(int * buffer, const Attribute & attribute) const
 {
-  value(buffer, sizeof(int), attribute);
+  value((void *)buffer, attribute);
 }
 
 void Tuple::value(char * buffer, const Attribute & attribute) const
 {
-  value(buffer, attribute.size(), attribute);
+  value((void *)buffer, attribute);
 }
 
-void Tuple::value(void * buffer, size_t length, 
-		  const Attribute & attribute) const
+void Tuple::value(int * buffer, const std::string & field) const
 {
-  int offset = m_schema->offset(&attribute);
-  memcpy(buffer, m_data + offset, length);
+  value((void *)buffer, field);
+}
+
+void Tuple::value(char * buffer, const std::string & field) const
+{
+  value((void *)buffer, field);
+}
+
+void Tuple::value(void * buffer, const std::string & field) const
+{
+  value((void *)buffer, *(*m_schema)[field]);
+}
+
+void Tuple::value(void * buffer, const Attribute & attribute) const
+{
+  memset(buffer, 0, attribute.size());
+  memcpy(buffer, m_data + m_schema->offset(&attribute), attribute.size()); 
 }
 
 void Tuple::map(const Tuple * other)
@@ -42,7 +56,7 @@ void Tuple::map(const Tuple * other)
   for (int i = 0; i < m_schema->nitems(); i++)
     {
       const Attribute * attribute = m_schema->at(i);
-      other->value(m_data + offset, attribute->size(), *attribute);
+      other->value(m_data + offset, *attribute);
       offset += attribute->size();
     }
 }
@@ -65,7 +79,7 @@ void Tuple::dump(std::ostream & output, char fs, char rs) const
 	  output << *(int *)(m_data + offset);
 	  break;
 	case STRING:
-	  memset(buffer, 0, m_schema->rsize());
+	  memset(buffer, 0, m_schema->rsize() + 1);
 	  memcpy(buffer, m_data + offset, attribute->size());
 	  output << buffer;
 	  break;

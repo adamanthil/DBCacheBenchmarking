@@ -6,32 +6,64 @@
 #include "FileManager.h"
 #include "BufferManager.h"
 
-SequentialScan::SequentialScan(const std::string & filename, 
-			       const Schema * schema)
+SequentialScan::SequentialScan(const Table * table, const std::string & alias, 
+			       const Columns & columns)
+  : m_clause(NULL), m_rid(0), m_page(NULL)
 {
-  m_fd = FileManager::getInstance()->open(filename);
+  m_fd = FileManager::getInstance()->open(table->path());
   m_buffer = BufferManager::getInstance()->allocate();
-  m_clause = NULL;
-  m_schema = schema;
-  m_data = new byte[m_schema->rsize()];
-}
 
-SequentialScan::SequentialScan(const std::string & filename, 
-			       const Schema * schema,
-			       WhereClause * clause)
-{
-  m_fd = FileManager::getInstance()->open(filename);
-  m_buffer = BufferManager::getInstance()->allocate();
-  m_schema = schema;
-  m_clause = clause;
+  m_schema = new Schema();
+  for (int i = 0; i < columns.count(); i++)
+    {
+      const Column * c = columns[i];
+      const Attribute * a = (*table->schema())[c->m_name];
+      Attribute attribute(a->id(), 0, a->name(), 
+			  alias, a->size(), a->type());
+      m_schema->add(&attribute);
+    }
   m_data = new byte[m_schema->rsize()];
+
+  m_tuple.m_data = NULL;
+  m_tuple.schema(NULL);
+
+  m_tsw = new TupleStreamWriter(*m_buffer, m_schema->rsize());
 }
 
 SequentialScan::~SequentialScan()
 {
+  delete [] m_data;
+  delete m_schema;
+  delete m_clause;
+
+  delete m_tuple.m_data;
+  delete m_tuple.schema();
+
+  delete m_tsw;
   BufferManager::getInstance()->deallocate(m_buffer);
   FileManager::getInstance()->close(m_fd);
-  delete [] m_data;
+}
+
+void SequentialScan::layout(const MaterializationLayout * layout)
+{
+  m_tsw->layout(layout);
+}
+
+void SequentialScan::filter(BooleanExpression * expression, const std::vector<std::string> & filterColumns)
+{
+  m_clause = new WhereClause(expression);
+
+  Schema * schema = new Schema();
+  for (int i = 0; i < filterColumns.size(); i++)
+    {
+      std::string s = filterColumns[i];
+      const Attribute * a = (*m_schema)[s];
+
+      schema->add(a);
+    }
+
+  m_tuple.m_data = new byte[schema->rsize()];
+  m_tuple.schema(schema);
 }
 
 const Schema * SequentialScan::schema() const
@@ -39,51 +71,47 @@ const Schema * SequentialScan::schema() const
   return m_schema;
 }
 
-byte * SequentialScan::extract(byte * buffer, const DiskPage * page, 
-			       int rid, const Schema * schema)
-{  
-  return buffer;
-}
-
 bool SequentialScan::moveNext() 
 {
-  int nrecords = 0;
-  int offset = 0;
-  int available = m_buffer->capacity();
   size_t rsize = m_schema->rsize();
 
-  Tuple tuple;
-  byte buffer[256]; // TODO: 
+  // TODO: create global for this. remove old commented code.
+  Tuple t;
+  t.m_data = m_data;
+  t.schema(m_schema);
 
-  tuple.m_data = buffer;
-  m_buffer->clear();
-  while (!m_fd->eof() && available >= rsize)
+  m_tsw->discard();
+
+  while (!m_tsw->isStreamFull()) // available >= rsize)
     {
-      DiskPage * page = BufferManager::getInstance()->read(m_fd);
+      // determine if we consumed all the data on current page
+      if (m_page == NULL || m_rid >= m_page->size())
+	{
+	  m_page = !m_fd->eof() ? BufferManager::getInstance()->read(m_fd) : NULL;
+	  m_rid = 0;
+	  
+	  if (m_page == NULL)
+	      break;
+	}
       
-      for (int rid = 0; rid < page->size() && available >= rsize; rid++)
+      for (; m_rid < m_page->size() && !m_tsw->isStreamFull(); /* available >= rsize */m_rid++)
 	{ 
 	  /* extract data to update variable expressions. */
 	  if (m_clause != NULL)
 	    {
-	      page->get(rid, (std::vector<Attribute *> &)m_clause->filter(), buffer, 
-			m_clause->schema()->rsize());
+	      m_page->get(m_rid, m_tuple.schema(), m_tuple.m_data, m_tuple.schema()->rsize());
 	    }
-
-	  /* extract tuple */
-	  if (m_clause == NULL || m_clause->evaluate(tuple))
+	  
+	  if (m_clause == NULL || m_clause->evaluate(m_tuple))
 	    {
 	      memset(m_data, 0, rsize);
-	      page->get(rid, m_schema, m_data, rsize); 
-	      offset = m_buffer->put(m_data, offset, rsize);
-	      available -= rsize;
-	      nrecords++;
+	      m_page->get(m_rid, m_schema, m_data, rsize); 
+	      m_tsw->write(t);
 	    }
 	}
     }
 
-  m_buffer->setSize(nrecords);
-  return  nrecords > 0;
+  return m_buffer->getSize() > 0; 
 }
 
 void SequentialScan::next(MemoryBlock & block)

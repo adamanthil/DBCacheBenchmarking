@@ -9,7 +9,7 @@ Partition::Partition()
 
 void Partition::add(const Attribute * at)
 {
-  m_fMap[at->qualifiedName()] = m_size;
+  m_fMap[at->qualifiedName()] = m_numBytes;
   m_numBytes += at->size();
 }
 

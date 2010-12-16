@@ -13,6 +13,7 @@ class IOperand
  public: 
   virtual T value() = 0;
   virtual int compareTo(IOperand<T> & other) = 0;
+  virtual Type type() = 0;
 };
 
 template<typename T>
@@ -41,27 +42,23 @@ class ConstantOperand : public Operand<T>
 class IVariableOperand
 {
  public: 
-  virtual void attribute(const Attribute * attribute) = 0;
-  virtual const Attribute * attribute() const = 0;
+  //virtual const std::string & name() const;
   virtual void data(const Tuple * t) = 0;
 };
 
 template<typename T>
-class VariableOperand : public Operand<T>, public IVariableOperand
+class VariableOperand : public IVariableOperand, public Operand<T>
 {
- public:
-  const Tuple * m_tuple;
  private:
-  const Attribute * m_attribute;
-  byte * m_buffer;
+  std::string m_name;
+  size_t m_size;
+  byte * m_buffer; // value buffer
+
+  const Tuple * m_tuple; // data buffer
  public:
-  VariableOperand(const Attribute * m_attribute,
-		  field_type_t type);
+  VariableOperand(const std::string & name, field_type_t type, size_t size);
   ~VariableOperand();
   virtual T value();
-  virtual const Attribute * attribute() const { return m_attribute; }
-  virtual void attribute(const Attribute * attribute) 
-  { m_attribute = attribute; }
   virtual void data(const Tuple * t);
 };
 
@@ -104,15 +101,10 @@ T ConstantOperand<T>::value()
 }
 
 template<typename T>
-VariableOperand<T>::VariableOperand(const Attribute * attribute,
-				    field_type_t type) :
-Operand<T>(VARIABLE, type)
+VariableOperand<T>::VariableOperand(const std::string & name, field_type_t type,
+				    size_t size) :
+Operand<T>(VARIABLE, type), m_size(size), m_name(name), m_tuple(NULL)
 {
-  size_t size = attribute->size() + (type == STRING);
-
-  m_tuple = NULL;
-
-  m_attribute = attribute;
   m_buffer = new byte[size];
   memset(m_buffer, 0, size);
 }
@@ -120,11 +112,7 @@ Operand<T>(VARIABLE, type)
 template<typename T>
 VariableOperand<T>::~VariableOperand()
 {
-  if (m_buffer != NULL)
-    {
-      delete [] m_buffer;
-      m_buffer = NULL;
-    }
+  delete [] m_buffer;
 }
 
 /*

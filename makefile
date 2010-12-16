@@ -14,6 +14,7 @@ SRC = Application.cpp \
 	Tuple.cpp \
 	Projection.cpp \
 	Attribute.cpp \
+	Column.cpp \
 	BooleanExpression.cpp \
 	Operand.cpp \
 	Clause.cpp \
@@ -21,13 +22,20 @@ SRC = Application.cpp \
 	DataCreator.cpp \
 	MergeJoin.cpp \
 	Query.cpp \
-	Database.cpp
+	Database.cpp \
+	Partition.cpp \
+	MaterializationLayout.cpp \
+	TupleStreamReader.cpp \
+	TupleStreamWriter.cpp \
+	Settings.cpp \
+	parser.cpp \
+	scanner.cpp
 
 release:
 	g++ -o dblite -O3 -funroll-loops $(SRC) 
 
 debug:
-	g++ -g -o dbl -O0 $(SRC) 
+	g++ -g -o dblite.dbg -O0 $(SRC) 
 
 clean:
-	rm -rf *.o *~ *.out *.exe *.prog
+	rm -rf *.o *~ *.out *.exe *.prog *dbl*

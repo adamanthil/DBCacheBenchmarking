@@ -7,6 +7,17 @@ Schema::Schema() :
 {
 }
 
+Schema::Schema(const std::vector<const Attribute *> * columns) 
+  :  m_size(0)
+{
+  reserve(columns->size());
+  std::vector<const Attribute *>::const_iterator i = columns->begin();
+  for ( ;  i != columns->end(); i++)
+    {
+      add(*i);
+    }
+}
+
 Schema::~Schema()
 {
   std::for_each(begin(), end(), free);
@@ -15,29 +26,39 @@ Schema::~Schema()
 void Schema::add(const Attribute * a)
 {
   Attribute * attribute = 
-    new Attribute(a->id(), size(), a->name(), a->table(),
-		  a->size(), a->type());
-
+    new Attribute(a->id(), size(), a->name(), a->table(), a->size(), a->type());
+  
   push_back(attribute);
-  m_offset.push_back(m_size);
+  
+  m_offset[attribute->qualified_name()] = m_size;
   m_size += attribute->size();
+}
+
+bool Schema::contains(const std::string & name) const
+{
+  return m_offset.find(name) != m_offset.end();
 }
 
 int Schema::offset(const Attribute * attribute) const
 {
-  return m_offset[attribute->position()];
+  return m_offset.find(attribute->qualified_name())->second;
+}
 
-  /*
+int Schema::offset(const std::string & column) const
+{
+  return m_offset.find(column)->second;
+}
+
+int Schema::offset(int fid) const
+{
+  int position = 0;
+
   for (int i = 0; i < size(); i++)
     {
-      const Attribute * a = at(i);
-      if (a->id() == attribute->id())
-	{
-	}
+      position += at(i)->size();
     }
   
-  return -1;
-  */
+  return position;
 }
 
 size_t Schema::rsize() const
@@ -56,7 +77,8 @@ const Attribute * Schema::operator[](const std::string & name) const
 
   for (int i = 0; i < size(); i++)
     {
-      if (name == (attribute = at(i))->name())
+      if (name == (attribute = at(i))->name() || // TODO: will use only q-name
+	  name == attribute->qualified_name())
 	{
 	  return attribute;
 	}

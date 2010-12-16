@@ -1,0 +1,16 @@
+<interactive-mode>
+
+command    argument	description
+=======    ======== 	===========
+tables	   N/A     	returns list of tables
+describe   <table>	returns table schema
+query	   <query>	executes query
+
+query syntax
+=====================================================
+projection(child; projection-list)
+merge-join(left-child, right-child; join-clause; )
+sscan(table[:alias]; projection-list; [where-clause])
+
+*projection-list ::= comma separated qualified attribute list.
+*example: projection(merge-join(sscan(T1:R; R.a, R.b; R.a < 5), sscan(T2:S; S.a, S.b; ); S.b = R.a; ); R.a, R.b, S.b)
