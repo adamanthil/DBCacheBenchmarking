@@ -1,5 +1,8 @@
 #include "MaterializationLayout.h"
 
+/**
+ * Constructor
+ */
 MaterializationLayout::MaterializationLayout(int n_partitions, size_t capacity, size_t recordSize)
 {
   m_capacity = capacity;
