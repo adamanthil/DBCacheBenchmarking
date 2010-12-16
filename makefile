@@ -27,6 +27,7 @@ SRC = Application.cpp \
 	MaterializationLayout.cpp \
 	TupleStreamReader.cpp \
 	TupleStreamWriter.cpp \
+	Settings.cpp \
 	parser.cpp \
 	scanner.cpp
 

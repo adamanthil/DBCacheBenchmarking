@@ -1,12 +1,83 @@
 #include <algorithm>
 #include <string.h>
 
+#include "Settings.h"
 #include "MergeJoin.h"
 #include "BufferManager.h"
 
 MergeJoin::MergeJoin(IRelationalOperator * lChild, IRelationalOperator * rChild,
 		     const Columns & joinColumns)
   : m_write_offset(0), m_merge_with(0)
+{
+  bool enable = false;
+
+  m_layout[0] = NULL;
+  m_layout[1] = NULL;
+
+  Settings::get("partition-materilization", enable);
+  if (enable)
+    InitializePartitionLayout(lChild, rChild, joinColumns);
+  else
+    InitializePartitionLayout(lChild, rChild, joinColumns);
+}
+
+void MergeJoin::InitializeFlatLayout(IRelationalOperator * lChild, 
+				     IRelationalOperator * rChild,
+				     const Columns & joinColumns)
+{
+  m_child[LEFT] = lChild;
+  m_child[RIGHT] = rChild;
+
+  /* create (left|right)+(proj|join) schemas. */
+  for (int i = 0; i < N_BRANCHES; i++)
+    {
+      int idx = i * 2;
+      Schema * joinSchema = new Schema();
+
+      m_consumed[i] = true;
+      m_inBuffer[i] = BufferManager::getInstance()->allocate();
+      
+      /* create projection & join schemas */
+      m_tuple[idx|PROJ].schema(m_child[i]->schema());
+      m_tuple[idx|JOIN].schema(m_child[i]->schema());
+
+      for (int j = 0; j < joinColumns.count(); j++)
+	{ 
+	  const Column * column = joinColumns.at(j);
+	  const Schema * schema = m_tuple[idx|PROJ].schema();
+	  
+	  if (schema->contains(column->m_qualified_name))
+	    {
+	      const Attribute * a = (*schema)[column->m_qualified_name];
+	      m_joinCols[idx|PROJ].push_back(a);
+	      m_joinCols[idx|JOIN].push_back(a);
+	    }  
+	}
+
+      m_tuple[idx|PROJ].m_data = new byte[m_tuple[idx|PROJ].schema()->rsize()];
+      m_tuple[idx|JOIN].m_data = new byte[m_tuple[idx|JOIN].schema()->rsize()];
+
+      m_tsr[i] = new TupleStreamReader(*m_inBuffer[i]);
+    }
+  
+  /* create merged schema */
+  for (int i = 0; i < N_BRANCHES; i++)
+    {
+      int idx = i * 2;
+      for (int j = 0; j < m_tuple[idx].schema()->nitems(); j++)
+	{
+	  m_schema.add(m_tuple[idx].schema()->at(j));
+	}
+    }
+  
+  m_data = new byte[m_schema.rsize()];
+  m_buffer = BufferManager::getInstance()->allocate();
+  m_tsw = new TupleStreamWriter(*m_buffer, m_schema.rsize());
+}
+
+void MergeJoin::InitializePartitionLayout(IRelationalOperator * lChild, 
+					  IRelationalOperator * rChild,
+					  const Columns & joinColumns)
 {
   std::vector<const Attribute *> partition[2];
 
@@ -142,11 +213,16 @@ int MergeJoin::compare(const Tuple & lhs, const std::vector<const Attribute *> &
       
       switch (lField->type())
 	{
-	case INTEGER:
+	case INTEGER: // endianness :(
 	  cmp = *(int *)(lhs.m_data + lhs.schema()->offset(lField)) -
 	    *(int *)(rhs.m_data + rhs.schema()->offset(rField));
 	  break;
 	case CHAR:
+	case STRING:
+	case BIT:
+	  cmp = memcmp(lhs.m_data + lhs.schema()->offset(lField),
+		       rhs.m_data + rhs.schema()->offset(rField),
+		       lField->size());
 	  break;
 	}
       
@@ -225,7 +301,7 @@ void MergeJoin::create_merge_stack()
   Tuple t;
 
   t.schema(m_tuple[TLEFT|PROJ].schema());
-  t.m_data = m_data; // TODO: is this correct value of m_data
+  t.m_data = m_data; // merged_data > left.proj_data
 
   m_merge_stack.clear();
 
@@ -328,7 +404,7 @@ bool MergeJoin::moveNext()
   bool peek = false;
 
   merge();
-  while (!m_tsw->isStreamFull()) // TODO: delete available >= rsize)
+  while (!m_tsw->isStreamFull()) 
     {
       // determined if we consumed data from both branches.	
       if (isEmpty(LEFT) || isEmpty(RIGHT))

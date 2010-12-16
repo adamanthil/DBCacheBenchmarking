@@ -70,6 +70,13 @@ class MergeJoin : public IRelationalOperator
   virtual void reset();
 
  private:
+  void InitializePartitionLayout(IRelationalOperator *,
+				 IRelationalOperator *,
+				 const Columns &);
+  void InitializeFlatLayout(IRelationalOperator *, 
+			    IRelationalOperator *,
+			    const Columns &);
+
   bool hasData(int);
   bool isEmpty(int branch);
   bool get_tuple(int branch, int tidx, bool peek);
