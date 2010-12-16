@@ -77,7 +77,7 @@ namespace lexer
     void iscan();
 
     /* clause (join/where) */
-    bool equi_join_clause();
+    Columns * equi_join_clause();
     BooleanExpression * where_clause();
     BooleanExpression * boolean_expression();
     BooleanTerm * boolean_term();

@@ -29,6 +29,8 @@ public:
   int id() const;
   int position() const;
   const std::string & qualified_name() const;
+  const std::string & qualifiedName() const { return qualified_name(); }
+
   const std::string & table() const;
   const std::string & name() const;
   size_t size() const;

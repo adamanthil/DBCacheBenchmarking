@@ -62,7 +62,7 @@ IRelationalOperator * Parser::relop()
 		    << "'; Expected: '" << Scanner::description(LPAREN) << "'"; 
 	}
     }
-  else if (consume(SELECTION))
+  else if (consume(SORT_MERGE_JOIN))
     {
       if (consume(LPAREN))
 	{
@@ -134,7 +134,7 @@ MergeJoin * Parser::merge_join()
       return NULL;
     }
 
-  equi_join_clause();
+  Columns * joinCols = equi_join_clause();
   if (!consume(SEMI_COLON))
     {
       std::cerr << "Unexpected token: '" << Scanner::description(m_token)
@@ -142,6 +142,7 @@ MergeJoin * Parser::merge_join()
 
       delete lChild;
       delete rChild;
+      delete joinCols;
 
       return NULL;
     }
@@ -149,14 +150,20 @@ MergeJoin * Parser::merge_join()
   if (!match(RPAREN))
     {
       ProjectionList * list = projection_list();
-      MergeJoin * join = new MergeJoin(lChild, rChild, m_columns, *list);
+      MergeJoin * join = NULL; // TODO: uncomment new MergeJoin(lChild, rChild, m_columns, *list);
       
       delete list;
+      delete joinCols;
+
       return join;
     }
   else
     {
-      return new MergeJoin(lChild, rChild, m_columns);
+      MergeJoin * join = new MergeJoin(lChild, rChild, *joinCols);
+      
+      delete joinCols;
+
+      return join;
     }
 }
 
@@ -180,6 +187,10 @@ SequentialScan * Parser::scan()
     }
 }
 
+/*
+ * @syntax = sscan(table[:alias]; [where-clause]; projection-list)
+ */
+
 SequentialScan * Parser::sscan()
 {
   if (!match(IDENTIFIER))
@@ -197,7 +208,7 @@ SequentialScan * Parser::sscan()
       if (match(IDENTIFIER))
 	{
 	  alias = m_scanner.value();
-	  consume(m_token); // consum table-alias.
+	  consume(m_token); // consume table-alias.
 	}
       else
 	std::cerr << "Unexpected token: '" << Scanner::description(m_token) 
@@ -205,7 +216,7 @@ SequentialScan * Parser::sscan()
     }
       
   if (consume(SEMI_COLON))
-    {
+    {	
       Columns * list = projection_list();
       
       if (consume(SEMI_COLON))
@@ -216,7 +227,7 @@ SequentialScan * Parser::sscan()
 	  SymbolTable::scope(s->schema());
 	  if (!match(RPAREN))
 	    {
-	      s->filter(where_clause(), m_columns);
+	      
 	    }
 	 
 	  delete list;
@@ -260,44 +271,66 @@ BooleanExpression * Parser::where_clause()
   return boolean_expression();
 }
 
-bool Parser::equi_join_clause()
+Columns * Parser::equi_join_clause()
 {
-  m_columns.clear();
+  
+  Columns * columns = new Columns();
   do
     {
       if (!match(ATTRIBUTE))
 	{
 	  std::cerr << "Unpexted token: '" << Scanner::description(m_token) 
 		    << "'; Expected: '" << Scanner::description(ATTRIBUTE) << "'";
-	  return false;
+	  
+	  delete columns;
+	  return NULL;
 	}
 
-      // TODO: if (!m_columns.contains(m_scanner.value()))
-	m_columns.push_back(m_scanner.value());
-
+      if (!columns->contains(m_scanner.value()))
+	{
+	  std::string column = m_scanner.value();
+	  int offset = column.find(".");
+	  std::string name = column.substr(1+offset);
+	  std::string table = column.substr(0, offset); 
+	  
+	  columns->add(name, table);
+	}
+      
       consume(m_token);
       if (!consume(EQ))
 	{
 	  std::cerr << "Unpexted token: '" << Scanner::description(m_token) 
 		    << "'; Expected: '" << Scanner::description(EQ) << "'";
-	  return false;
+	  
+	  delete columns;
+	  return NULL;
+
 	}
 
       if (!match(ATTRIBUTE))
 	{
 	  std::cerr << "Unpexted token: '" << Scanner::description(m_token) 
 		    << "'; Expected: '" << Scanner::description(ATTRIBUTE) << "'";
-	  return false;
+	  
+	  delete columns;
+	  return NULL;
 	}
 
-      // TODO: if (!m_columns.contains(m_scanner.value()))
-	m_columns.push_back(m_scanner.value());
+      if (!columns->contains(m_scanner.value()))
+	{
+	  std::string column = m_scanner.value();
+	  int offset = column.find(".");
+	  std::string name = column.substr(1+offset);
+	  std::string table = column.substr(0, offset); 
+	  
+	  columns->add(name, table);
+	}
 
       consume(m_token);
     }
   while (consume(AND));
 
-  return true;
+  return columns;
 }
 
 BooleanExpression * Parser::boolean_expression()

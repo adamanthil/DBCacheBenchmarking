@@ -7,6 +7,9 @@
 #include "Tuple.h"
 #include "Column.h"
 
+#include "TupleStreamReader.h"
+#include "TupleStreamWriter.h"
+
 //typedef std::vector<const Attribute *> SortKey;
 
 typedef std::vector<const Attribute *> ComparisonList;
@@ -18,38 +21,41 @@ class MergeJoin : public IRelationalOperator
 {
  private:
   enum { LEFT = 0, RIGHT, N_BRANCHES };
+
   /*
    * TLEFT  = left-child (projection/join) tuple.
    * TRIGHT = right-child (projection/join) tuple.
    */ 
-
   enum { TLEFT = 0, TRIGHT = 2, NCHILD_TUPLES = 4 }; 
+  
   /*
-   * PROJ = retrieve all columns involved in the projected tuple.
+   * PROJ = projection columns.
    * JOIN = retrieve only the columns involed in the join. 
    */
-  enum subset_t { PROJ = 0, JOIN = 1 }; 
+  enum { PROJ = 0, JOIN = 1 }; 
 
   IRelationalOperator * m_child[N_BRANCHES];
 
-  int m_total; // total records created as result of join.
-
-  int m_next[N_BRANCHES]; // next record id to consume.
+  bool m_eof[N_BRANCHES]; // flag indicating if file has been completely exhausted.
   bool m_consumed[N_BRANCHES];  // flag indicating if current block has been exhausted
   MemoryBlock * m_inBuffer[N_BRANCHES]; // input buffers from left & right branch
+
   Tuple m_tuple[NCHILD_TUPLES]; // current child tuple being examined
 
   MemoryBlock * m_buffer; // output buffer.
   byte * m_data; // underlying data-buffer for merged tuple.
 
+  /* rewind stack since operators do not have rewind feature. */
   std::vector<byte *> m_merge_stack;
   int m_merge_with;
   int m_write_offset;
   
-  Columns m_joinCols[N_BRANCHES]; // columns involved in equi-join 
-
+  std::vector<const Attribute *> m_joinCols[4];
   Schema m_schema; // projected schema. 
   
+  MaterializationLayout * m_layout[N_BRANCHES];
+  TupleStreamReader * m_tsr[N_BRANCHES];
+  TupleStreamWriter * m_tsw;
  public:
   MergeJoin(IRelationalOperator * lChild, IRelationalOperator * rChild,
 	    const Columns & joinColumns);
@@ -58,6 +64,7 @@ class MergeJoin : public IRelationalOperator
   ~MergeJoin();
 
   virtual const Schema * schema() const;
+  virtual void layout(const MaterializationLayout * layout);
   virtual bool moveNext();
   virtual void next(MemoryBlock & buffer);
   virtual void reset();
@@ -65,13 +72,14 @@ class MergeJoin : public IRelationalOperator
  private:
   bool hasData(int);
   bool isEmpty(int branch);
+  bool get_tuple(int branch, int tidx, bool peek);
+ 
+  int compare(const Tuple &, const std::vector<const Attribute *> &, 
+	      const Tuple &, const std::vector<const Attribute *> &);
 
-  bool get_tuple(int branch, int tidx);
-  // TODO: another cheat. 
-  int compare(const Tuple &, const Columns *, const Tuple &, const Columns *);
-  void concatenate(Tuple &, const Tuple &, const Tuple &);
-  void create_merge_stack();
-  int merge(size_t);
+  void concatenate(Tuple &, const Tuple &, const Tuple &); 
+ void create_merge_stack();
+  void merge();
 };
 
 #endif

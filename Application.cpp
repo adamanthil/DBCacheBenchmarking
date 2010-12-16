@@ -38,24 +38,14 @@ void query(const std::string & query)
   delete op;
 }
 
-void ProjectionFilter(const Table & table)
+void populate()
 {
+  
 }
 
-void LoopJoin(const Table & table1, const Table & table2) 
+void usage()
 {
-}
-
-void CartesianJoin(const Table & table1, const Table & table2) 
-{
-}
-
-void EquiJoin(const Table & t1, const Table & t2)
-{
-}
-
-void SelectWhere(const Table & tbl)
-{
+  
 }
 
 void imode()
@@ -112,6 +102,10 @@ void imode()
 	  getline(std::cin, q);
 	  query(q);
 	}
+      else if (cmd == "create")
+	{
+	  populate();
+	}
       else if (cmd == "help")
 	{
 	  std::cout << "display usage" << std::endl;
@@ -136,7 +130,7 @@ void initialize(const char * db = "db.xml", const char * files = "config")
   BufferManager::Initialize();
   std::cout << "loading database info..."; std::cout.flush();
   Database::Initialize(db);
-  std::cout << "loading relations..."; std::cout.flush();
+  std::cout << "loading database tables..."; std::cout.flush();
   FileManager::Initialize(files);
   std::cout << "done" << std::endl;
 };

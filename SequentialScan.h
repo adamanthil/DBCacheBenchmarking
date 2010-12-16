@@ -12,6 +12,8 @@
 #include "MemoryBlock.h"
 #include "Clause.h"
 
+#include "TupleStreamWriter.h"
+
 class SequentialScan : public IRelationalOperator
 {
  private:
@@ -25,6 +27,7 @@ class SequentialScan : public IRelationalOperator
   WhereClause * m_clause;
 
   Tuple m_tuple; // filtered tuple. 
+  TupleStreamWriter * m_tsw;
   
  public:
 
@@ -35,6 +38,7 @@ class SequentialScan : public IRelationalOperator
   void filter(BooleanExpression * expression, const std::vector<std::string> & filterColumns);
 
   virtual const Schema * schema() const;
+  virtual void layout(const MaterializationLayout * layout);
   virtual bool moveNext();
   virtual void next(MemoryBlock & buffer);
   virtual void reset();

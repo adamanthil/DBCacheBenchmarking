@@ -26,6 +26,8 @@ SequentialScan::SequentialScan(const Table * table, const std::string & alias,
 
   m_tuple.m_data = NULL;
   m_tuple.schema(NULL);
+
+  m_tsw = new TupleStreamWriter(*m_buffer, m_schema->rsize());
 }
 
 SequentialScan::~SequentialScan()
@@ -37,8 +39,14 @@ SequentialScan::~SequentialScan()
   delete m_tuple.m_data;
   delete m_tuple.schema();
 
+  delete m_tsw;
   BufferManager::getInstance()->deallocate(m_buffer);
   FileManager::getInstance()->close(m_fd);
+}
+
+void SequentialScan::layout(const MaterializationLayout * layout)
+{
+  m_tsw->layout(layout);
 }
 
 void SequentialScan::filter(BooleanExpression * expression, const std::vector<std::string> & filterColumns)
@@ -65,14 +73,16 @@ const Schema * SequentialScan::schema() const
 
 bool SequentialScan::moveNext() 
 {
-  int nrecords = 0;
-  int offset = 0;
-  int available = m_buffer->capacity();
   size_t rsize = m_schema->rsize();
 
-  m_buffer->clear();
+  // TODO: create global for this. remove old commented code.
+  Tuple t;
+  t.m_data = m_data;
+  t.schema(m_schema);
 
-  while (available >= rsize)
+  m_tsw->discard();
+
+  while (!m_tsw->isStreamFull()) // available >= rsize)
     {
       // determine if we consumed all the data on current page
       if (m_page == NULL || m_rid >= m_page->size())
@@ -84,7 +94,7 @@ bool SequentialScan::moveNext()
 	      break;
 	}
       
-      for (; m_rid < m_page->size() && available >= rsize; m_rid++)
+      for (; m_rid < m_page->size() && !m_tsw->isStreamFull(); /* available >= rsize */m_rid++)
 	{ 
 	  /* extract data to update variable expressions. */
 	  if (m_clause != NULL)
@@ -96,15 +106,12 @@ bool SequentialScan::moveNext()
 	    {
 	      memset(m_data, 0, rsize);
 	      m_page->get(m_rid, m_schema, m_data, rsize); 
-	      offset = m_buffer->put(m_data, offset, rsize); // update to use smart buffer. 
-	      available -= rsize;
-	      nrecords++;
+	      m_tsw->write(t);
 	    }
 	}
     }
 
-  m_buffer->setSize(nrecords);
-  return nrecords > 0;
+  return m_buffer->getSize() > 0; 
 }
 
 void SequentialScan::next(MemoryBlock & block)

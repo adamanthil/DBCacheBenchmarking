@@ -11,7 +11,13 @@ void Columns::add(const std::string & name, const std::string table)
   Column * c = new Column();
   c->m_name = name;
   c->m_table = table;
+  c->m_qualified_name = table + "." + name;
   push_back(c); 
+}
+
+bool Columns::contains(const std::string & column) const
+{
+  return false; // TODO: 
 }
 
 const Column * Columns::at(int c) const

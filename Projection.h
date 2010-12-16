@@ -39,6 +39,8 @@ class Projection : public IRelationalOperator
   virtual void reset() {}
   virtual void dump(std::ostream & strm,
 		    char fs = '|', char rs = '\n');
+
+  virtual void layout(const MaterializationLayout *) { }
 };
 
 #endif

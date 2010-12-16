@@ -6,18 +6,16 @@ FileManager* FileManager::instance = 0;
 
 void FileManager::Initialize(const std::string & config_file, const std::string & schema_file)
 {
-  if (!FileManager::instance)
-  {
-    instance = new FileManager(config_file,schema_file);
-  }
+  if (FileManager::instance == NULL)
+    FileManager::instance = new FileManager(config_file,schema_file);
 }
 
 FileManager * FileManager::getInstance()
 {
   if (!FileManager::instance)
-  {
-    FileManager::instance = new FileManager("config","schema");
-  }
+    {
+      FileManager::instance = new FileManager("config", "schema");
+    }
   return FileManager::instance;
 }
 

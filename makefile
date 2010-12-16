@@ -23,6 +23,10 @@ SRC = Application.cpp \
 	MergeJoin.cpp \
 	Query.cpp \
 	Database.cpp \
+	Partition.cpp \
+	MaterializationLayout.cpp \
+	TupleStreamReader.cpp \
+	TupleStreamWriter.cpp \
 	parser.cpp \
 	scanner.cpp
 

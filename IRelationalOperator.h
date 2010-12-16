@@ -6,6 +6,7 @@
 
 #include "MemoryBlock.h"
 #include "Schema.h"
+#include "MaterializationLayout.h"
 
 typedef std::vector<const Attribute *> ColumnList;
 
@@ -21,6 +22,8 @@ class IRelationalOperator
   virtual void reset() = 0;
   virtual void dump(std::ostream & strm,
 		    char fs = '|', char rs = '\n') {}
+
+  virtual void layout(const MaterializationLayout * layout) = 0;
 
   /*
   virtual void open() = 0;
