@@ -36,5 +36,8 @@ release:
 debug:
 	g++ -g -o dblite.dbg -O0 $(SRC) 
 
+generator:
+	g++ -g -o genqueries GenerateQueries.cpp
+
 clean:
 	rm -rf *.o *~ *.out *.exe *.prog *dbl*
