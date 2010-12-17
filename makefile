@@ -37,6 +37,7 @@ release:
 debug:
 	g++ -g -o dblite.dbg -O0 $(SRC) 
 
+# only compile data generator (for testing. probably should be deleted)
 generator:
 	g++ -g -o genqueries GenerateQueries.cpp
 
