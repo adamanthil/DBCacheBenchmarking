@@ -28,7 +28,8 @@ SRC = Application.cpp \
 	TupleStreamReader.cpp \
 	TupleStreamWriter.cpp \
 	Parser.cpp \
-	Scanner.cpp
+	Scanner.cpp \
+	Settings.cpp
 
 release:
 	g++ -o dblite -O3 -funroll-loops $(SRC) 

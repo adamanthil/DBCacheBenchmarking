@@ -7,6 +7,7 @@
 #include <new>
 
 #include "Parser.h"
+#include "Settings.h"
 
 #include "Database.h"
 #include "FileManager.h"
@@ -124,12 +125,12 @@ void imode()
     }
 }
 
-void initialize(const char * db = "db.xml", const char * files = "config")
+void initialize(const char * catalog = "db.xml", const char * files = "config")
 {
   std::cout << "initializing..."; std::cout.flush();
   BufferManager::Initialize();
   std::cout << "loading database info..."; std::cout.flush();
-  Database::Initialize(db);
+  Database::Initialize(catalog);
   std::cout << "loading database tables..."; std::cout.flush();
   FileManager::Initialize(files);
   std::cout << "done" << std::endl;
@@ -138,35 +139,18 @@ void initialize(const char * db = "db.xml", const char * files = "config")
 int main(int argc, char ** argv)
 {
 
-  initialize();
+  const char * catalog = "db.xml";
+  const char * files = "config";
+
+  Settings::set("partition-materilization", true);
+
+  if (argc >= 2)
+    catalog = argv[1];
+  if (argc >= 3)
+    files = argv[2];
+  
+  initialize(catalog, files);
   imode();
-
-  /*
-  Schema schema;
-  Schema projection;
-  
-  std::cerr << "initializing...";
-  //DataCreator::CreateDB("createdb", false);
-  
-  BufferManager::Initialize(4096);
-  FileManager::Initialize(argv[1], "db.xml");
-  Database::Initialize("db.xml");
-  Database * db = Database::getInstance();
-  
-  std::cerr << "complete" << std::endl;
-
-  const Table * t = db->table("test1");
-  const Table * t0 = db->table("test2");
-  
-  // SelectAll(*t);
-  ProjectionFilter(*t);
-  //SelectAll(*t0);
-  //SelectWhere(*t);
-
-  //CartesianJoin(*t,*t0);
-  //EquiJoin(*t, *t0);
-  //LoopJoin(*t,*t);
-  */
 }
 
 #endif

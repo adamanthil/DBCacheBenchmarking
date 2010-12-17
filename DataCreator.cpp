@@ -50,6 +50,20 @@ void DataCreator::CreateDB(const std::string & configFile, bool makeHuman)
 	      memcpy(record_buf + (nBytes*k)+s,&field,sizeof(field));
 	    }
           }
+          if(iType.compare("randIncr") == 0)
+          {
+            std::string start;
+            std::getline(dataFormat,start);
+            int s = atoi(start.c_str());
+            int field = rand() % 50;
+            memcpy(record_buf +s,&field,sizeof(field));
+            for (int k = 1; k < nRecords; k++)
+            {
+              int inc = (rand() % 100) + 1;
+              field += inc;
+              memcpy(record_buf+(nBytes*k)+s,&field,sizeof(field));
+            }
+          }
           else if(iType.compare("range") == 0)
           {
             std::string lower;
@@ -77,6 +91,64 @@ void DataCreator::CreateDB(const std::string & configFile, bool makeHuman)
 	      }
               memcpy(record_buf + (nBytes*k)+s, &field, sizeof(field));
 	    }
+          }
+          else if(iType.compare("oddRange") == 0)
+          {
+            std::string lower;
+            std::string upper;
+            std::getline(dataFormat,lower,'|');
+            std::getline(dataFormat,upper,'|');
+            std::string start;
+            std::getline(dataFormat,start);
+            int s = atoi(start.c_str());
+            int lB = atoi(lower.c_str());
+            int uB = atoi(upper.c_str());
+            int diff = uB - lB + 1;
+            for (int k = 0; k < nRecords; k++)
+            {
+              int field = (rand() % diff) + lB;
+              if ((field % 2) == 0)
+              {
+                if (field == uB)
+                {
+                 field--;
+                }
+                else
+                {
+                 field++;
+                }
+              }
+              memcpy(record_buf + (nBytes*k)+s, &field, sizeof(field));
+            }
+          }
+          else if(iType.compare("evenRange") == 0)
+          {
+            std::string lower;
+            std::string upper;
+            std::getline(dataFormat,lower,'|');
+            std::getline(dataFormat,upper,'|');
+            std::string start;
+            std::getline(dataFormat,start);
+            int s = atoi(start.c_str());
+            int lB = atoi(lower.c_str());
+            int uB = atoi(upper.c_str());
+            int diff = uB - lB + 1;
+            for (int k = 0; k < nRecords; k++)
+            {
+              int field = (rand() % diff) + lB;
+              if ((field % 2) != 0)
+              {
+                if (field == uB)
+                {
+                 field--;
+                }
+                else
+                {
+                 field++;
+                }
+              }
+              memcpy(record_buf + (nBytes*k)+s, &field, sizeof(field));
+            }
           }
           else
           {

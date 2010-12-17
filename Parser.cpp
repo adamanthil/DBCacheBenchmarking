@@ -227,7 +227,7 @@ SequentialScan * Parser::sscan()
 	  SymbolTable::scope(s->schema());
 	  if (!match(RPAREN))
 	    {
-	      
+	      s->filter(where_clause(), m_columns);
 	    }
 	 
 	  delete list;
