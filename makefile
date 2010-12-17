@@ -27,8 +27,8 @@ SRC = Application.cpp \
 	MaterializationLayout.cpp \
 	TupleStreamReader.cpp \
 	TupleStreamWriter.cpp \
-	parser.cpp \
-	scanner.cpp
+	Parser.cpp \
+	Scanner.cpp
 
 release:
 	g++ -o dblite -O3 -funroll-loops $(SRC) 
