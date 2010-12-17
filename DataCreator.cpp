@@ -50,7 +50,7 @@ void DataCreator::CreateDB(const std::string & configFile, bool makeHuman)
 	      memcpy(record_buf + (nBytes*k)+s,&field,sizeof(field));
 	    }
           }
-          if(iType.compare("randIncr") == 0)
+          else if(iType.compare("randIncr") == 0)
           {
             std::string start;
             std::getline(dataFormat,start);
