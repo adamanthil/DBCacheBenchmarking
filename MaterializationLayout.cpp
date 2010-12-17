@@ -31,6 +31,8 @@ void MaterializationLayout::add(const std::vector<const Attribute *> & atts)
   m_partitions[m_currentPartition].setOffset(m_currentOffset);
   m_partitions[m_currentPartition].calcSize(numRecords);
   m_currentOffset += m_partitions[m_currentPartition].bytes();
+
+  m_currentPartition++;
 }
 
 Partition * MaterializationLayout::getPartition(std::string column) const

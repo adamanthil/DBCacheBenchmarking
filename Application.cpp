@@ -6,7 +6,7 @@
 #include <iostream>
 #include <new>
 
-#include "parser.h"
+#include "Parser.h"
 #include "Settings.h"
 
 #include "Database.h"
@@ -103,9 +103,14 @@ void imode()
 	  getline(std::cin, q);
 	  query(q);
 	}
-      else if (cmd == "create")
+      else if (cmd == "layout")
 	{
-	  populate();
+	  bool enabled = false;
+	  Settings::get("partition-materilization", enabled);
+	  Settings::set("partition-materilization", !enabled);
+	  Settings::get("partition-materilization", enabled);
+	  std::cout << "layout set to =" << (enabled ? "partitoned" : "flat")
+		    << std::endl;
 	}
       else if (cmd == "help")
 	{

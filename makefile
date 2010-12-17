@@ -27,15 +27,21 @@ SRC = Application.cpp \
 	MaterializationLayout.cpp \
 	TupleStreamReader.cpp \
 	TupleStreamWriter.cpp \
-	Settings.cpp \
-	parser.cpp \
-	scanner.cpp
+	Parser.cpp \
+	Scanner.cpp \
+	Settings.cpp
 
 release:
 	g++ -o dblite -O3 -funroll-loops $(SRC) 
+	g++ -o genqueries GenerateQueries.cpp
 
 debug:
 	g++ -g -o dblite.dbg -O0 $(SRC) 
+	g++ -g -o genqueries GenerateQueries.cpp
+
+# only compile data generator (for testing. probably should be deleted)
+generator:
+	g++ -g -o genqueries GenerateQueries.cpp
 
 clean:
-	rm -rf *.o *~ *.out *.exe *.prog *dbl*
+	rm -rf *.o *~ *.out *.exe *.prog *dbl* *genqueries*

@@ -49,11 +49,12 @@ int Schema::offset(const std::string & column) const
   return m_offset.find(column)->second;
 }
 
+
 int Schema::offset(int fid) const
 {
   int position = 0;
 
-  for (int i = 0; i < size(); i++)
+  for (int i = 0; i < fid; i++)
     {
       position += at(i)->size();
     }

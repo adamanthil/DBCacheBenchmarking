@@ -1,6 +1,3 @@
-a.out
-a.out.dSYM
-dbl
-dbl.dSYM
-dblite
+dblite*
+genqueries*
 Data/
