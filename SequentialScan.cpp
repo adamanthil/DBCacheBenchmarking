@@ -75,7 +75,7 @@ bool SequentialScan::moveNext()
 {
   size_t rsize = m_schema->rsize();
 
-  // TODO: create global for this. remove old commented code.
+  // TODO: create global for this. 
   Tuple t;
   t.m_data = m_data;
   t.schema(m_schema);

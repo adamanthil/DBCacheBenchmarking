@@ -70,6 +70,11 @@ void imode()
 	      std::cout << tables.at(i)->name() << std::endl;
 	    }
 	}
+      else if (cmd == "create")
+	{
+	  std::string config;
+	  std::cin >> config;	 
+	}
       else if (cmd == "describe")
 	{
 	  std::string tbl;
@@ -143,7 +148,6 @@ void initialize(const char * catalog = "db.xml", const char * files = "config")
 
 int main(int argc, char ** argv)
 {
-
   const char * catalog = "db.xml";
   const char * files = "config";
 
