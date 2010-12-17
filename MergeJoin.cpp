@@ -270,8 +270,7 @@ void MergeJoin::concatenate(Tuple & dst, const Tuple & s, const Tuple & t)
   memcpy(dst.m_data, s.m_data, s.schema()->rsize());
   memcpy(dst.m_data + s.schema()->rsize(), t.m_data, t.schema()->rsize());
     
-  /*
-  std::cerr << "concat("; s.dump(std::cerr, '|', ';'); t.dump(std::cerr, '|', ')');
+  /*  std::cerr << "concat("; s.dump(std::cerr, '|', ';'); t.dump(std::cerr, '|', ')');
   std::cerr << "=";
   dst.schema(&m_schema); dst.dump(std::cerr);
   */
@@ -406,7 +405,7 @@ bool MergeJoin::moveNext()
   merge();
   while (!m_tsw->isStreamFull()) 
     {
-      // determined if we consumed data from both branches.	
+      // determine if we consumed data from both branches.	
       if (isEmpty(LEFT) || isEmpty(RIGHT))
 	break; // terminate loop;
       

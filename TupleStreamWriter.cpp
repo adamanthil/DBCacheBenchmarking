@@ -54,17 +54,8 @@ void TupleStreamWriter::write(Tuple & t)
   }
   else
   {
-    int totalNumBytes = atts->rsize();
-    for (int k = 0; k < numFields; k++)
-    {
-      const Attribute * a = atts->at(k);
-      int fSize = a->size();
-      char * fVal = new char[fSize];
-      t.value(fVal,*a);
-      int p = atts->offset(a);
-      int offset = totalNumBytes*m_nRecs + p;
-      m_block.put((byte*)fVal, offset, fSize);
-    }
+    int offset = t.schema()->rsize()*m_nRecs;
+    m_block.put((byte*)t.m_data, offset, t.schema()->rsize());
   }
   m_pos += m_record_size;
   m_nRecs++;

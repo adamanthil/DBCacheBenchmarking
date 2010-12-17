@@ -17,7 +17,13 @@ void Columns::add(const std::string & name, const std::string table)
 
 bool Columns::contains(const std::string & column) const
 {
-  return false; // TODO: 
+  for (int i = 0; i < size(); i++)
+    {
+      const Column * c = std::vector<Column *>::at(i);
+      if (c->m_qualified_name == column)
+	return true;
+    }
+  return false; 
 }
 
 const Column * Columns::at(int c) const
