@@ -3,27 +3,12 @@
 
 #include <iostream>
 #include <stdlib.h>
+#include <time.h>
 
 // Forward declarations
 void genQuery(int, int);
 void query0(int);
 void query1(int);
-
-// entry point
-int main(int argc, char ** argv)
-{
-	
-	// initialize random seed
-	srand ( time(NULL) );
-	
-	// Loop through number of arguments (number of queries to run)
-	for(int i = 0; i < argc; i++) {
-		int count = atoi(argv[i]);
-		genQuery(i-1, count);
-	}
-	
-	return 0;
-}
 
 void genQuery(int query, int count) {
 	switch(query) {
@@ -51,6 +36,22 @@ void query1(int count) {
 		int number = rand() % 100 + 1;
 		std::cout << "sscan(T1:R; R.a, R.b; R.a > " << number << ")" << std::endl;
 	}
+}
+
+// entry point
+int main(int argc, char ** argv)
+{
+	
+	// initialize random seed
+	srand ( time(NULL) );
+	
+	// Loop through number of arguments (number of queries to run)
+	for(int i = 0; i < argc; i++) {
+		int count = atoi(argv[i]);
+		genQuery(i-1, count);
+	}
+	
+	return 0;
 }
 
 #endif
