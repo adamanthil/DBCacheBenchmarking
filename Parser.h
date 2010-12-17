@@ -4,7 +4,7 @@
 #include <string>
 #include <vector>
 
-#include "scanner.h"
+#include "Scanner.h"
 
 #include "Column.h"
 #include "Clause.h"

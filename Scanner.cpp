@@ -3,7 +3,7 @@
 #include <strings.h>
 #include <iostream>
 
-#include "scanner.h"
+#include "Scanner.h"
 
 using namespace lexer;
 

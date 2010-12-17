@@ -4,33 +4,105 @@
       <schema>
         <attribute id="0" name="a" type="INTEGER" length="4" />
 	<attribute id="1" name="b" type="INTEGER" length="4" />
-	<attribute id="2" name="c" type="STRING" length="96" />
-	<attribute id="3" name="d" type="INTEGER" length="4" />
-	<attribute id="4" name="e" type="INTEGER" length="4" />
-	<attribute id="5" name="f" type="STRING" length="23" />
-	<attribute id="6" name="g" type="CHAR" length="1" />
-	<attribute id="7" name="h" type="STRING" length="32" />
-	<attribute id="8" name="i" type="INTEGER" length="4" />
-        <attribute id="9" name="j" type="STRING" length="28" />
+        <attribute id="2" name="c" type="INTEGER" length="4" />
+        <attribute id="3" name="d" type="INTEGER" length="4" />
+        <attribute id="4" name="e" type="INTEGER" length="4" />
+        <attribute id="5" name="f" type="INTEGER" length="4" />
+        <attribute id="6" name="g" type="INTEGER" length="4" />
+        <attribute id="7" name="h" type="INTEGER" length="4" />
+        <attribute id="8" name="i" type="INTEGER" length="4" />
+        <attribute id="9" name="j" type="INTEGER" length="4" />
+        <attribute id="10" name="k" type="INTEGER" length="4" />
+        <attribute id="11" name="l" type="INTEGER" length="4" />
+        <attribute id="12" name="m" type="INTEGER" length="4" />
+	<attribute id="13" name="n" type="STRING" length="52" />
+	<attribute id="14" name="o" type="STRING" length="52" />
+	<attribute id="15" name="p" type="CHAR" length="1" />
+        <attribute id="16" name="q" type="STRING" length="52" />
       </schema>
     </table>
     <table id="1" name="T2" path="Data/testTable2.tab">
       <schema>
         <attribute id="0" name="a" type="INTEGER" length="4" />
-        <attribute id="1" name="b" type="INTEGER" length="4" />
-        <attribute id="2" name="c" type="STRING" length="12" />
+	<attribute id="1" name="b" type="INTEGER" length="4" />
+        <attribute id="2" name="c" type="INTEGER" length="4" />
+        <attribute id="3" name="d" type="INTEGER" length="4" />
+        <attribute id="4" name="e" type="INTEGER" length="4" />
+        <attribute id="5" name="f" type="INTEGER" length="4" />
+        <attribute id="6" name="g" type="INTEGER" length="4" />
+        <attribute id="7" name="h" type="INTEGER" length="4" />
+        <attribute id="8" name="i" type="INTEGER" length="4" />
+        <attribute id="9" name="j" type="INTEGER" length="4" />
+        <attribute id="10" name="k" type="INTEGER" length="4" />
+        <attribute id="11" name="l" type="INTEGER" length="4" />
+        <attribute id="12" name="m" type="INTEGER" length="4" />
+	<attribute id="13" name="n" type="STRING" length="52" />
+	<attribute id="14" name="o" type="STRING" length="52" />
+        <attribute id="15" name="p" type="STRING" length="52" />
       </schema>
     </table>
-    <table id="0" name="T3" path="Data/testTable3.tab">
+    <table id="2" name="T3" path="Data/testTable3.tab">
       <schema>
         <attribute id="0" name="a" type="INTEGER" length="4" />
 	<attribute id="1" name="b" type="INTEGER" length="4" />
-	<attribute id="2" name="c" type="STRING" length="15" />
-	<attribute id="3" name="d" type="STRING" length="22" />
-	<attribute id="4" name="e" type="INTEGER" length="4" />
-	<attribute id="5" name="f" type="STRING" length="23" />
-	<attribute id="6" name="g" type="INTEGER" length="4" />
-	<attribute id="7" name="h" type="INTEGER" length="4" />
+        <attribute id="2" name="c" type="INTEGER" length="4" />
+        <attribute id="3" name="d" type="INTEGER" length="4" />
+        <attribute id="4" name="e" type="INTEGER" length="4" />
+        <attribute id="5" name="f" type="INTEGER" length="4" />
+        <attribute id="6" name="g" type="INTEGER" length="4" />
+	<attribute id="7" name="h" type="CHAR" length="1" />
+        <attribute id="8" name="i" type="INTEGER" length="4" />
+        <attribute id="9" name="j" type="INTEGER" length="4" />
+        <attribute id="10" name="k" type="INTEGER" length="4" />
+        <attribute id="11" name="l" type="INTEGER" length="4" />
+	<attribute id="12" name="m" type="CHAR" length="1" />
+        <attribute id="13" name="n" type="INTEGER" length="4" />
+        <attribute id="14" name="o" type="INTEGER" length="4" />
+	<attribute id="15" name="p" type="STRING" length="52" />
+	<attribute id="16" name="q" type="STRING" length="52" />
+        <attribute id="17" name="r" type="STRING" length="52" />
+      </schema>
+    </table>
+    <table id="3" name="T4" path="Data/testTable4.tab">
+      <schema>
+        <attribute id="0" name="a" type="INTEGER" length="4" />
+	<attribute id="1" name="b" type="INTEGER" length="4" />
+        <attribute id="2" name="c" type="INTEGER" length="4" />
+        <attribute id="3" name="d" type="INTEGER" length="4" />
+        <attribute id="4" name="e" type="INTEGER" length="4" />
+        <attribute id="5" name="f" type="INTEGER" length="4" />
+        <attribute id="6" name="g" type="INTEGER" length="4" />
+        <attribute id="7" name="h" type="INTEGER" length="4" />
+        <attribute id="8" name="i" type="INTEGER" length="4" />
+        <attribute id="9" name="j" type="INTEGER" length="4" />
+        <attribute id="10" name="k" type="INTEGER" length="4" />
+	<attribute id="11" name="l" type="CHAR" length="1" />
+        <attribute id="12" name="m" type="INTEGER" length="4" />
+        <attribute id="13" name="n" type="INTEGER" length="4" />
+	<attribute id="14" name="o" type="STRING" length="32" />
+	<attribute id="15" name="p" type="STRING" length="32" />
+        <attribute id="16" name="q" type="STRING" length="61" />
+      </schema>
+    </table>
+    <table id="4" name="T5" path="Data/testTable5.tab">
+      <schema>
+        <attribute id="0" name="a" type="INTEGER" length="4" />
+	<attribute id="1" name="b" type="INTEGER" length="4" />
+        <attribute id="2" name="c" type="INTEGER" length="4" />
+        <attribute id="3" name="d" type="INTEGER" length="4" />
+        <attribute id="4" name="e" type="INTEGER" length="4" />
+        <attribute id="5" name="f" type="INTEGER" length="4" />
+        <attribute id="6" name="g" type="INTEGER" length="4" />
+        <attribute id="7" name="h" type="INTEGER" length="4" />
+        <attribute id="8" name="i" type="INTEGER" length="4" />
+        <attribute id="9" name="j" type="INTEGER" length="4" />
+        <attribute id="10" name="k" type="INTEGER" length="4" />
+	<attribute id="11" name="l" type="CHAR" length="1" />
+        <attribute id="12" name="m" type="INTEGER" length="4" />
+        <attribute id="13" name="n" type="INTEGER" length="4" />
+	<attribute id="14" name="o" type="STRING" length="61" />
+	<attribute id="15" name="p" type="STRING" length="52" />
+        <attribute id="16" name="q" type="STRING" length="32" />
       </schema>
     </table>
   </tables>

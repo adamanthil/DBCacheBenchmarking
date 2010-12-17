@@ -6,7 +6,7 @@
 #include <iostream>
 #include <new>
 
-#include "parser.h"
+#include "Parser.h"
 #include "Settings.h"
 
 #include "Database.h"

@@ -1,6 +1,6 @@
 #include <iostream>
 
-#include "parser.h"
+#include "Parser.h"
 #include "syscatalog.h"
 
 using namespace lexer;
