@@ -30,11 +30,18 @@ typedef ConstantOperand<const char *> StringConstant;
 typedef VariableOperand<int> IntVariable;
 typedef VariableOperand<const char *> StringVariable;
 
+void profile(const std::string & query)
+{
+  Parser p;
+  Query q(0, p.parse(query));
+  q.profile();
+}
+
 void query(const std::string & query)
 {
   Parser p;
-  IRelationalOperator * op = p.parse(query);
-
+  IRelationalOperator * op =  p.parse(query);
+  
   op->dump(std::cout);
   delete op;
 }
@@ -102,11 +109,14 @@ void imode()
 	      std::cout << "invalid table name. type 'tables' for list of tables" << std::endl;
 	    }
 	}
-      else if (cmd == "query")
+      else if (cmd == "query" || cmd == "profile")
 	{
 	  std::string q;
 	  getline(std::cin, q);
-	  query(q);
+	  if (cmd == "query")
+	    query(q);
+	  else
+	    profile(q);
 	}
       else if (cmd == "layout")
 	{

@@ -18,7 +18,7 @@ MergeJoin::MergeJoin(IRelationalOperator * lChild, IRelationalOperator * rChild,
   if (enable)
     InitializePartitionLayout(lChild, rChild, joinColumns);
   else
-    InitializePartitionLayout(lChild, rChild, joinColumns);
+    InitializeFlatLayout(lChild, rChild, joinColumns);
 }
 
 void MergeJoin::InitializeFlatLayout(IRelationalOperator * lChild, 
@@ -270,7 +270,8 @@ void MergeJoin::concatenate(Tuple & dst, const Tuple & s, const Tuple & t)
   memcpy(dst.m_data, s.m_data, s.schema()->rsize());
   memcpy(dst.m_data + s.schema()->rsize(), t.m_data, t.schema()->rsize());
     
-  /*  std::cerr << "concat("; s.dump(std::cerr, '|', ';'); t.dump(std::cerr, '|', ')');
+  /*
+  std::cerr << "concat("; s.dump(std::cerr, '|', ';'); t.dump(std::cerr, '|', ')');
   std::cerr << "=";
   dst.schema(&m_schema); dst.dump(std::cerr);
   */
