@@ -111,9 +111,9 @@ void imode()
       else if (cmd == "layout")
 	{
 	  bool enabled = false;
-	  Settings::get("partition-materilization", enabled);
-	  Settings::set("partition-materilization", !enabled);
-	  Settings::get("partition-materilization", enabled);
+	  Settings::get("partition-materialization", enabled);
+	  Settings::set("partition-materialization", !enabled);
+	  Settings::get("partition-materialization", enabled);
 	  std::cout << "layout set to =" << (enabled ? "partitoned" : "flat")
 		    << std::endl;
 	}
@@ -151,7 +151,7 @@ int main(int argc, char ** argv)
   const char * catalog = "db.xml";
   const char * files = "config";
 
-  Settings::set("partition-materilization", true);
+  Settings::set("partition-materialization", true);
 
   if (argc >= 2)
     catalog = argv[1];
