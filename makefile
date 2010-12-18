@@ -39,9 +39,10 @@ debug:
 	g++ -g -o dblite.dbg -O0 $(SRC) 
 	g++ -g -o genqueries GenerateQueries.cpp
 
-# only compile data generator (for testing. probably should be deleted)
-generator:
+# only compile data generator &  benchmark tool
+benchmarking:
 	g++ -g -o genqueries GenerateQueries.cpp
+	#g++ -g -o benchmark Benchmark.cpp
 
 clean:
 	rm -rf *.o *~ *.out *.exe *.prog *dbl* *genqueries*

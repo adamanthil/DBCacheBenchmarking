@@ -14,7 +14,7 @@ MergeJoin::MergeJoin(IRelationalOperator * lChild, IRelationalOperator * rChild,
   m_layout[0] = NULL;
   m_layout[1] = NULL;
 
-  Settings::get("partition-materilization", enable);
+  Settings::get("partition-materialization", enable);
   if (enable)
     InitializePartitionLayout(lChild, rChild, joinColumns);
   else
