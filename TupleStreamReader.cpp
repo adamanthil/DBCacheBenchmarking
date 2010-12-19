@@ -32,19 +32,24 @@ void TupleStreamReader::read(Tuple & t)
   int totalNumBytes = atts->rsize();
   if (m_layout != NULL)
   {
+    std::set<Partition *> pVisited;
+    std::set<Partition *>::iterator it;
     int numFields = atts->nitems();
     for (int j = 0; j < numFields; j++)
     {
       std::string fName = atts->at(j)->qualifiedName();
       Partition * part = m_layout->getPartition(fName);
+      it = pVisited.find(part);
+      if (it == pVisited.end())
+      {
+      pVisited.insert(part);
       int partitionStart = part->start();
       int partitionBytes = part->bytes();
-      int fieldLoc = part->getFLoc(fName);
-      int fieldSize = atts->at(j)->size();
-      int offset = partitionStart + partitionBytes*m_nRecs + fieldLoc;
+      int offset = partitionStart + partitionBytes;
       int readOffset = atts->offset(fName);
       byte * readInto = &t.m_data[readOffset];
-      m_block.get(readInto,offset,fieldSize);
+      m_block.get(readInto,offset,partitionBytes);
+      }
     }
   }
   else
