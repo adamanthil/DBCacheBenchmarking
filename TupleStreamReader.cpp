@@ -29,26 +29,21 @@ void TupleStreamReader::read(Tuple & t)
 {
   if (m_layout != NULL)
   {
-<<<<<<< HEAD
-    std::set<Partition *> pVisited;
-    std::set<Partition *>::iterator it;
-    int numFields = atts->nitems();
-    for (int j = 0; j < numFields; j++)
-    {
-      std::string fName = atts->at(j)->qualifiedName();
-      Partition * part = m_layout->getPartition(fName);
-      it = pVisited.find(part);
-      if (it == pVisited.end())
+
+    int tuple_offset = 0;
+    
+    for (int i = 0; i < 2 /* m_layout->npartitions() */; i++)
       {
-      pVisited.insert(part);
-      int partitionStart = part->start();
-      int partitionBytes = part->bytes();
-      int offset = partitionStart + partitionBytes;
-      int readOffset = atts->offset(fName);
-      byte * readInto = &t.m_data[readOffset];
-      m_block.get(readInto,offset,partitionBytes);
+	const Partition * p = m_layout->partition(i);
+
+	// all or none
+	if ((t.schema()->m_partitions & (i+1)) == 0)
+	  continue;
+	
+	int partition_offset = p->start() + p->bytes() * m_nRecs;
+	m_block.get(t.m_data + tuple_offset, partition_offset, p->bytes());
+	tuple_offset += p->bytes();
       }
-    }
   }
   else
   {

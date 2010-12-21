@@ -9,6 +9,7 @@ const Schema * SymbolTable::m_symbols = NULL;
 
 Parser::Parser() 
 {
+
 }
 
 IRelationalOperator * Parser::parse(const std::string & query)
