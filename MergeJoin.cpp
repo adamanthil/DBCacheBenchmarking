@@ -79,6 +79,7 @@ void MergeJoin::InitializePartitionLayout(IRelationalOperator * lChild,
 					  IRelationalOperator * rChild,
 					  const Columns & joinColumns)
 {
+  std::vector<const Attribute *> layout;
   std::vector<const Attribute *> partition[2];
 
   m_child[LEFT] = lChild;
@@ -88,22 +89,30 @@ void MergeJoin::InitializePartitionLayout(IRelationalOperator * lChild,
   for (int i = 0; i < N_BRANCHES; i++)
     {
       int idx = i * 2;
-      Schema * joinSchema = new Schema();
+      Schema * joinSchema = new Schema(); joinSchema->m_partitions = 1;
+
+      layout.clear();
+      layout.reserve(m_child[i]->schema()->nitems());
 
       m_consumed[i] = true;
       m_inBuffer[i] = BufferManager::getInstance()->allocate();
-      
+
       /* create projection schema */
       m_tuple[idx|PROJ].schema(m_child[i]->schema());
-      
+            
+      /* retrieve join columns for ith child */
       for (int j = 0; j < joinColumns.count(); j++)
 	{ 
 	  const Column * column = joinColumns.at(j);
 	  const Schema * schema = m_tuple[idx|PROJ].schema();
-	  
+
 	  if (schema->contains(column->m_qualified_name))
 	    {
-	      m_joinCols[idx|PROJ].push_back((*schema)[column->m_qualified_name]);
+	      const Attribute * a = (*schema)[column->m_qualified_name];
+	      m_joinCols[idx|PROJ].push_back(a);
+
+	      joinSchema->add(a);
+	      m_joinCols[idx|JOIN].push_back(a);
 	    }  
 	}
 
@@ -123,32 +132,25 @@ void MergeJoin::InitializePartitionLayout(IRelationalOperator * lChild,
 	  else
 	    {
 	      partition[0].push_back(a);
-	    }
-	}
-      m_layout[i]->add(partition[0]);
-      m_layout[i]->add(partition[1]);
-      
-      /* create join schema */
-      m_tuple[idx|JOIN].schema(joinSchema);
-      for (int j = 0; j < joinColumns.count(); j++)
-	{
-	  const Schema * schema = m_tuple[idx|PROJ].schema();
-	  const Column * column = joinColumns.at(j);
-	  std::string name = column->m_qualified_name;
-	  if (schema->contains(name))
-	    {
-	      joinSchema->add((*schema)[name]);
+	      layout.push_back(a);
 	    }
 	}
 
-      for (int j = 0; j < joinColumns.count(); j++)
+      m_layout[i]->add(partition[0]);
+      m_layout[i]->add(partition[1]);
+
+      /* synchronize schemas for read optimization */
+      for (int j = 0; j < partition[1].size(); j++)
 	{
-	  const Column * column = joinColumns.at(j);
-	  const Schema * schema = m_tuple[idx|JOIN].schema();
-	  
-	  if (schema->contains(column->m_qualified_name))
-	    m_joinCols[idx|JOIN].push_back((*schema)[column->m_qualified_name]);
+	  layout.push_back(partition[1][j]);
 	}
+
+      Schema * s = new Schema(&layout);
+      s->m_partitions = 3;
+      m_tuple[idx|PROJ].schema(s); 
+      
+      /* create join schema */
+      m_tuple[idx|JOIN].schema(joinSchema);
 
       m_tuple[idx|PROJ].m_data = new byte[m_tuple[idx|PROJ].schema()->rsize()];
       m_tuple[idx|JOIN].m_data = new byte[m_tuple[idx|JOIN].schema()->rsize()];
@@ -175,7 +177,10 @@ void MergeJoin::InitializePartitionLayout(IRelationalOperator * lChild,
 
 MergeJoin::~MergeJoin()
 {
+  bool enable = false;
   BufferManager * bm = BufferManager::getInstance();
+
+  Settings::get("partition-materialization", enable);
 
   for (int i = 0; i < N_BRANCHES; i++)
     {
@@ -188,6 +193,8 @@ MergeJoin::~MergeJoin()
   for (int i = 0; i < NCHILD_TUPLES; i++)
     {
       delete [] m_tuple[i].m_data;
+      if (enable)
+	delete m_tuple[i].schema();
     }
 
   bm->deallocate(m_buffer);

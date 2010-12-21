@@ -20,6 +20,9 @@ class MaterializationLayout
   ~MaterializationLayout();
   void add(const std::vector<const Attribute *> & atts);
   Partition * getPartition(std::string column) const;
+
+  inline const Partition * partition(int i) const { return &m_partitions[i]; };
+  inline int npartitions() const { return m_currentPartition; }
 };
 
 #endif

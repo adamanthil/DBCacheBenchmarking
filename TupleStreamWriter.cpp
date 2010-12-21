@@ -35,28 +35,38 @@ bool TupleStreamWriter::isStreamFull()
 
 void TupleStreamWriter::write(Tuple & t)
 {
-  const Schema * atts = t.schema();
-  int numFields = atts->nitems();
   if (m_layout != NULL)
-  {
-    for (int j = 0; j < numFields; j++)
-    {
-      const Attribute * a = atts->at(j);
-      std::string fName = a->qualifiedName();
-      Partition * part = m_layout->getPartition(fName);
-      int partitionStart = part->start();
-      int partitionByte = part->bytes();
-      int fieldLoc = part->getFLoc(fName);
-      int fSize = a->size();
-      int offset = partitionStart + partitionByte*m_nRecs + fieldLoc;
-      m_block.put(t.m_data+t.schema()->offset(a), offset, fSize);
-    }
+  {    
+    int tuple_offset = 0;
+    for (int i = 0; i < 2 /* m_layout->npartitions() */; i++)
+      {
+	const Partition * p = m_layout->partition(i);
+	int offset = p->start() + p->bytes() * m_nRecs;
+
+	/* If we cascaded the interesting fields down, we could optimize
+	   the writes as below. However, testing has shown this will not 
+	   improve performance beyond that of a n-ary layout. Therefore no 
+	   more development on this optimization 
+       
+	m_block.put(t.m_data + tuple_offset, offset, p->bytes());
+	tuple_offset += p->bytes();
+	*/
+
+	for (int j = 0; j < p->nitems(); j++)
+	  {
+	    const Attribute * a = p->attribute(j);
+	    
+	    m_block.put(t.m_data + t.schema()->offset(a), offset, a->size());
+	    offset += a->size();
+	  }
+      }
   }
   else
   {
     int offset = t.schema()->rsize()*m_nRecs;
     m_block.put((byte*)t.m_data, offset, t.schema()->rsize());
   }
+
   m_pos += m_record_size;
   m_nRecs++;
   m_block.setSize(m_nRecs);
