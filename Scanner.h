@@ -62,7 +62,7 @@ namespace lexer
     token next();
     const std::string & value() { return m_value; }
 
-    static const char * description(token t);
+    static const char * description(token);
   };
 
 }

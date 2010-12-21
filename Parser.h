@@ -83,7 +83,7 @@ namespace lexer
     BooleanTerm * boolean_term();
     IBooleanFactor * boolean_factor();
     IBooleanFactor * boolean_factor(std::string & l, Type, std::string & r, Type, 
-				    IBooleanFactor::LogicalOperator op, field_type_t t,
+				    IBooleanFactor::LogicalOperator op, field_type_t,
 				    size_t field_len);
     bool logical_op();
     IBooleanFactor::LogicalOperator logical_op(token t);
