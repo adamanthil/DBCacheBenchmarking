@@ -31,6 +31,8 @@ class Schema : private std::vector<Attribute *>
   const Attribute * at(int fid) const;
 
   bool contains(const std::string &) const;
+
+  int m_partitions;
 };
 
 #endif

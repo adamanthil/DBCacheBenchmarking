@@ -120,12 +120,31 @@ void imode()
 	}
       else if (cmd == "layout")
 	{
+	  std::string option;
 	  bool enabled = false;
-	  Settings::get("partition-materialization", enabled);
-	  Settings::set("partition-materialization", !enabled);
-	  Settings::get("partition-materialization", enabled);
-	  std::cout << "layout set to =" << (enabled ? "partitoned" : "flat")
-		    << std::endl;
+	  
+	  getline(std::cin, option);
+
+	  if (option == " ?")
+	    {
+	      Settings::get("partition-materialization", enabled);
+	      std::cout << "layout = " << (!enabled ? "flat" : "partitioned")
+			<< std::endl;
+	    }
+	  else if (option == " f")
+	    {
+	      Settings::set("partition-materialization", false);
+	    }
+	  else if (option == " p")
+	    {
+	      Settings::set("partition-materialization", true);
+	    }
+	  else
+	    {
+	      std::cerr << "Invalid option '" << option << "'; valid options are: [?, p, f]"
+			<< std::endl;
+	    }
+
 	}
       else if (cmd == "help")
 	{
@@ -162,6 +181,7 @@ int main(int argc, char ** argv)
   const char * catalog = "db.xml";
   const char * files = "config";
 
+  //DataCreator::CreateDB("createdb", false);
   Settings::set("partition-materialization", true);
 
   if (argc >= 2)
