@@ -6,6 +6,7 @@
 #include "MaterializationLayout.h"
 #include "Tuple.h"
 #include "globals.h"
+#include <set>
 
 class TupleStreamReader
 {
