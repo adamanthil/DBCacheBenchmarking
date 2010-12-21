@@ -90,7 +90,7 @@ void imode()
 
 	  std::string file;
 	  getline(std::cin, file);
-	  std::cout << "creating files...program will exit once complete..."
+	  std::cout << "****program will exit once complete****"
 		    << std::endl;
 	  DataCreator::CreateDB(file.c_str() + 1, false);	
 	  std::cout << "done...exiting" << std::endl;
@@ -209,7 +209,6 @@ void initialize(const char * catalog = "db.xml", const char * files = "config")
 
 int main(int argc, char ** argv)
 {
-  DataCreator::CreateDB("createdb",false);
   const char * catalog = "db.xml";
   const char * files = "config";
 

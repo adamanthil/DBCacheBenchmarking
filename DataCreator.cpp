@@ -261,6 +261,7 @@ void DataCreator::CreateDB(const std::string & configFile, bool makeHuman)
       }
       hFile.close();
     }
+    delete record_buf;
   }
   dataFormat.close();
 }

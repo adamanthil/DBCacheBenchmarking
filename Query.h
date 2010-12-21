@@ -2,6 +2,7 @@
 #define QUERY_H_
 
 #include <iostream>
+#include <ctime>
 #include "IRelationalOperator.h"
 
 class Query
@@ -11,9 +12,10 @@ class Query
   IRelationalOperator * m_op;
 
   /* statistics collected */
-  int m_stime;
-  int m_etime;
-  int m_duration;
+  clock_t m_stime;
+  clock_t m_etime;
+  int m_count;
+  float m_duration;
   int m_nrecords;
   int m_nfetches;
  public:
@@ -21,7 +23,7 @@ class Query
   ~Query();
   void * execute();
 
-  void profile();
+  void profile(int count = 1);
   void stats(std::ostream &);
 };
 
