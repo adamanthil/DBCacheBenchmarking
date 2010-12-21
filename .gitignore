@@ -1,4 +1,5 @@
 dblite*
 genqueries*
 benchmark*
+*.o
 Data/
