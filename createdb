@@ -1,5 +1,5 @@
 testTable1.tab
-17|10000|209
+17|1000|209
 int|incr|0
 int|randIncr|4
 int|range|0|1|0|0|8
@@ -18,7 +18,7 @@ string|52|104
 string|1|156
 string|52|157
 testTable2.tab
-16|20000|208
+16|2000|208
 int|incr|0
 int|randIncr|4
 int|range|0|1|0|0|8
@@ -36,7 +36,7 @@ string|52|52
 string|52|104
 string|52|156
 testTable3.tab
-18|50000|210
+18|5000|210
 int|incr|0
 int|randIncr|4
 int|range|0|1|0|0|8
@@ -56,7 +56,7 @@ string|52|54
 string|52|106
 string|52|158
 testTable4.tab
-17|100000|178
+17|1000|178
 int|incr|0
 int|randIncr|4
 int|range|0|1|0|0|8
@@ -75,7 +75,7 @@ string|32|53
 string|32|85
 string|61|117
 testTable5.tab
-17|100000|198
+17|1000|198
 int|incr|0
 int|randIncr|4
 int|range|0|1|0|0|8
