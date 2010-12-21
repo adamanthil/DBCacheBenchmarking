@@ -2,7 +2,8 @@
 .SUFFIXES: .o .cpp
 
 CXX=g++
-CXXFLAGS=-O3 -funroll-loops
+CXXFLAGS=-O0 -g
+#-O3 -funroll-loops
 SRC=FileManager.cpp \
 	DiskPage.cpp \
 	MemoryBlock.cpp \
@@ -62,5 +63,5 @@ cpp.o:
 	$(CXX) $(CXXFLAGS) -s $< 
 
 clean:
-	rm -rf *.o
+	rm -rf *.o *~
 
