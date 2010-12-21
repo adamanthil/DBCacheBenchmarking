@@ -158,6 +158,7 @@ void initialize(const char * catalog = "db.xml", const char * files = "config")
 
 int main(int argc, char ** argv)
 {
+  DataCreator::CreateDB("createdb",false);
   const char * catalog = "db.xml";
   const char * files = "config";
 
