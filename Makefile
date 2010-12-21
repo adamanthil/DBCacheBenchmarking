@@ -36,22 +36,31 @@ SRC=FileManager.cpp \
 
 OBJS=$(SRC:.cpp=.o)
 
-dblite: $(OBJS) Application.o
-	g++ -o dblite ${OBJS} Application.o
+all: dblite benchmarking
 
-benchmarking: $(OBJS) GenerateQueries.o Benchmark.o
-	g++ -g -o genqueries $(OBJS) GenerateQueries.o
-	g++ -g -o benchmark $(OBJS) Benchmark.o
+dblite: $(OBJS) Application.o
+	$(CXX) -o dblite ${OBJS} Application.o
+
+benchmarking: genqueries benchmark
+
+genqueries: $(OBJS) GenerateQueries.o 
+	$(CXX) -g -o genqueries $(OBJS) GenerateQueries.o
+
+benchmark: Benchmark.o $(OBJS)
+	$(CXX) -g -o benchmark $(OBJS) Benchmark.o
 
 GenerateQueries.o: GenerateQueries.cpp
-	g++ $(CXXFLAGS) -c GenerateQueries.cpp
+	$(CXX) $(CXXFLAGS) -c GenerateQueries.cpp
 
 Benchmark.o: Benchmark.cpp $(SRC)
-	g++ $(CXXFLAGS) -c Benchmark.cpp
+	$(CXX) $(CXXFLAGS) -c Benchmark.cpp
 
 Application.o: Application.cpp
-	g++ $(CXXFLAGS) -c Application.cpp
+	$(CXX) $(CXXFLAGS) -c Application.cpp
 
 cpp.o:
-	g++ $(CXXFLAGS) -s $< 
+	$(CXX) $(CXXFLAGS) -s $< 
+
+clean:
+	rm -rf *.o
 
