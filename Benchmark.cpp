@@ -119,7 +119,7 @@ int main(int argc, char ** argv)
 	int availThreads = numThreads;	// number of available threads
 	
 	// Setup database
-	DataCreator::CreateDB("createdb",false);
+	//DataCreator::CreateDB("createdb",false);	// Should not create every time, just load existing files
     const char * catalog = "db.xml";
     const char * files = "config";
 	initialize(catalog, files);
@@ -135,15 +135,15 @@ int main(int argc, char ** argv)
 	memset(threadInUse, 0, numThreads);	// Set to 0
 	
 	// Read standard input
-	std::string query;
-	getline(std::cin, query);
+	std::string * query = new std::string();	// Declare on heap for thread access.  Thread will delete it
+	getline(std::cin, *query);
 	
 	int queryNum = 0;
 	pthread_t nextThread;
 	int threadOffset = -1;
 	
 	// Loop till there are no more queries to execute
-	while(query != "end" && query != "quit" && query != "exit") {
+	while(*query != "end" && *query != "quit" && *query != "exit") {
 		
 		// Check if there is an available thread
 		if(availableThread(threadOffset)) {
@@ -153,13 +153,14 @@ int main(int argc, char ** argv)
 			// Instantiate a new container to pass to the thread.  Thread will delete it
 			ThreadContainer * container = new ThreadContainer();
 			container->threadNum = threadOffset;
-			container->query = new std::string();
+			container->query = query;
 			
 			int retVal = pthread_create( threads[threadOffset], NULL, profile, (void*) &container);
 			
-			//profile(query);
+			//profile(container);
 
-			getline(std::cin, query);
+			query = new std::string();
+			getline(std::cin, *query);
 			queryNum++;
 		}
 
