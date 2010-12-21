@@ -31,16 +31,15 @@ void TupleStreamReader::read(Tuple & t)
   {
 
     int tuple_offset = 0;
-
+    
     for (int i = 0; i < 2 /* m_layout->npartitions() */; i++)
       {
 	const Partition * p = m_layout->partition(i);
 
 	// all or none
 	if ((t.schema()->m_partitions & (i+1)) == 0)
-	  //if (!t.schema()->contains(p->attribute(0)->qualified_name()))
 	  continue;
-
+	
 	int partition_offset = p->start() + p->bytes() * m_nRecs;
 	m_block.get(t.m_data + tuple_offset, partition_offset, p->bytes());
 	tuple_offset += p->bytes();

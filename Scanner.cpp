@@ -10,6 +10,7 @@ using namespace lexer;
 Scanner::Scanner() 
   : m_query(NULL), m_position(0), m_value("")
 {
+
 }
 
 void Scanner::tokenize(const char * query)
