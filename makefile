@@ -1,6 +1,5 @@
 
-SRC = Application.cpp \
-	FileManager.cpp \
+SRC = FileManager.cpp \
 	DiskPage.cpp \
 	MemoryBlock.cpp \
 	FileDescriptor.cpp \
@@ -32,17 +31,19 @@ SRC = Application.cpp \
 	Settings.cpp
 
 release:
-	g++ -o dblite -O3 -funroll-loops $(SRC) 
+	g++ -o dblite -O3 -funroll-loops Application.cpp $(SRC) 
+	g++ -o benchmark -O3 -funroll-loops Benchmark.cpp $(SRC)
 	g++ -o genqueries GenerateQueries.cpp
 
 debug:
-	g++ -g -o dblite.dbg -O0 $(SRC) 
+	g++ -g -o dblite.dbg -O0 Application.cpp $(SRC) 
+	g++ -g -o benchmark Benchmark.cpp $(SRC)
 	g++ -g -o genqueries GenerateQueries.cpp
 
 # only compile data generator &  benchmark tool
 benchmarking:
 	g++ -g -o genqueries GenerateQueries.cpp
-	#g++ -g -o benchmark Benchmark.cpp
+	g++ -g -o benchmark Benchmark.cpp $(SRC)
 
 clean:
 	rm -rf *.o *~ *.out *.exe *.prog *dbl* *genqueries*
