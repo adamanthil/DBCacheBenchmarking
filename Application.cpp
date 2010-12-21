@@ -50,7 +50,7 @@ void query(const std::string & query)
 
 void usage()
 {
-  std::cout << "dblite [<schema-file> <layout-file>]" << std::endl
+  std::cout << "dblite [<layout-file> <schema-file>]" << std::endl
 	    << "command       options                   description" << std::endl
 	    << "=======       =======                   ===========" << std::endl
 	    << "help                                    display usage/help" << std::endl
@@ -136,7 +136,7 @@ void imode()
 	    {
 	      std::string s;
 	      int count = 0;
-	      getline(std::cin, s);
+	      std::cin >> s;
 	      if ((count = atoi(s.c_str())))
 		{
 		  getline(std::cin, q);
@@ -215,9 +215,10 @@ int main(int argc, char ** argv)
   Settings::set("partition-materialization", true);
 
   if (argc >= 2)
-    catalog = argv[1];
+    files = argv[1];
   if (argc >= 3)
-    files = argv[2];
+    catalog = argv[2];
+    
   
   initialize(catalog, files);
   imode();
