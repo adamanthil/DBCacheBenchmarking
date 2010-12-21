@@ -12,7 +12,6 @@ class TupleStreamReader
 {
  private:
   int m_nRecs;
-  int m_pos;
   const MaterializationLayout * m_layout;
   MemoryBlock & m_block;
  public:

@@ -30,23 +30,38 @@ typedef ConstantOperand<const char *> StringConstant;
 typedef VariableOperand<int> IntVariable;
 typedef VariableOperand<const char *> StringVariable;
 
+void profile(const std::string & query, int  count = 1)
+{
+  Parser p;
+  Query q(0, p.parse(query));
+  q.profile(count);
+
+  q.stats(std::cout);
+}
+
 void query(const std::string & query)
 {
   Parser p;
-  IRelationalOperator * op = p.parse(query);
-
+  IRelationalOperator * op =  p.parse(query);
+  
   op->dump(std::cout);
   delete op;
 }
 
-void populate()
-{
-  
-}
-
 void usage()
 {
-  
+  std::cout << "dblite [<schema-file> <layout-file>]" << std::endl
+	    << "command       options                   description" << std::endl
+	    << "=======       =======                   ===========" << std::endl
+	    << "help                                    display usage/help" << std::endl
+	    << "query         <query>                   execute query, results are returned to stdout" << std::endl
+	    << "profile       [count] <query>           profiles the query" << std::endl
+	    << "layout        ?|f|p                     gets/sets the current materialization" << std::endl
+	    << "              ? - get current layout" << std::endl
+	    << "              f - singl partition" << std::endl
+	    << "              p - 2-partitons" << std::endl
+	    << "quit                                    exits the program" << std::endl
+	    << std::endl;
 }
 
 void imode()
@@ -72,8 +87,14 @@ void imode()
 	}
       else if (cmd == "create")
 	{
-	  std::string config;
-	  std::cin >> config;	 
+
+	  std::string file;
+	  getline(std::cin, file);
+	  std::cout << "****program will exit once complete****"
+		    << std::endl;
+	  DataCreator::CreateDB(file.c_str() + 1, false);	
+	  std::cout << "done...exiting" << std::endl;
+	  exit(0); 
 	}
       else if (cmd == "describe")
 	{
@@ -102,24 +123,64 @@ void imode()
 	      std::cout << "invalid table name. type 'tables' for list of tables" << std::endl;
 	    }
 	}
-      else if (cmd == "query")
+      else if (cmd == "query" || cmd == "profile")
 	{
 	  std::string q;
-	  getline(std::cin, q);
-	  query(q);
+	  
+	  if (cmd == "query")
+	    {
+	      getline(std::cin, q);
+	      query(q);
+	    }
+	  else
+	    {
+	      std::string s;
+	      int count = 0;
+	      getline(std::cin, s);
+	      if ((count = atoi(s.c_str())))
+		{
+		  getline(std::cin, q);
+		}
+	      else
+		{
+		  count = 1;
+		  q = s;
+		}
+	      profile(q, count);
+	    }
 	}
       else if (cmd == "layout")
 	{
+	  std::string option;
 	  bool enabled = false;
-	  Settings::get("partition-materilization", enabled);
-	  Settings::set("partition-materilization", !enabled);
-	  Settings::get("partition-materilization", enabled);
-	  std::cout << "layout set to =" << (enabled ? "partitoned" : "flat")
-		    << std::endl;
+	  
+	  getline(std::cin, option);
+
+	  if (option == " ?")
+	    {
+	      Settings::get("partition-materialization", enabled);
+	      std::cout << "layout = " << (!enabled ? "flat" : "partitioned")
+			<< std::endl;
+	    }
+	  else if (option == " f")
+	    {
+	      Settings::set("partition-materialization", false);
+	    }
+	  else if (option == " p")
+	    {
+	      Settings::set("partition-materialization", true);
+	    }
+	  else
+	    {
+	      std::cerr << "Invalid option '" << option << "'; valid options are: [?, p, f]"
+			<< std::endl;
+	    }
+
 	}
       else if (cmd == "help")
 	{
 	  std::cout << "display usage" << std::endl;
+	  usage();
 	}
       else
 	{
@@ -151,7 +212,7 @@ int main(int argc, char ** argv)
   const char * catalog = "db.xml";
   const char * files = "config";
 
-  Settings::set("partition-materilization", true);
+  Settings::set("partition-materialization", true);
 
   if (argc >= 2)
     catalog = argv[1];

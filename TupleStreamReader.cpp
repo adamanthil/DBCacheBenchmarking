@@ -5,7 +5,6 @@
 
 TupleStreamReader::TupleStreamReader(MemoryBlock & block) : m_block(block)
 {
-  m_pos = 0;
   m_nRecs = 0;
   m_layout = NULL;
 }
@@ -28,10 +27,9 @@ void TupleStreamReader::peek(Tuple & t)
 
 void TupleStreamReader::read(Tuple & t)
 {
-  const Schema * atts = t.schema();
-  int totalNumBytes = atts->rsize();
   if (m_layout != NULL)
   {
+<<<<<<< HEAD
     std::set<Partition *> pVisited;
     std::set<Partition *>::iterator it;
     int numFields = atts->nitems();
@@ -55,10 +53,11 @@ void TupleStreamReader::read(Tuple & t)
   else
   {
     const Schema * atts = t.schema();
+    int totalNumBytes = atts->rsize();
     int offset = totalNumBytes*m_nRecs;
+   
     m_block.get(t.m_data,offset,totalNumBytes);
   }
-  m_pos += totalNumBytes;
   m_nRecs++;
 }
 
@@ -79,6 +78,5 @@ void TupleStreamReader::rewind(int nback)
 
 void TupleStreamReader::reset()
 {
-  m_pos = 0;
   m_nRecs = 0;
 }
