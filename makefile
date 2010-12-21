@@ -1,5 +1,10 @@
+.SUFFIXES:
+.SUFFIXES: .o .cpp
 
-SRC = FileManager.cpp \
+CXX=g++
+CXXFLAGS=-g -O0
+#-O3 -funroll-loops
+SRC=FileManager.cpp \
 	DiskPage.cpp \
 	MemoryBlock.cpp \
 	FileDescriptor.cpp \
@@ -30,20 +35,33 @@ SRC = FileManager.cpp \
 	Scanner.cpp \
 	Settings.cpp
 
-release:
-	g++ -o dblite -O3 -funroll-loops Application.cpp $(SRC) 
-	g++ -o benchmark -O3 -funroll-loops Benchmark.cpp $(SRC)
-	g++ -o genqueries GenerateQueries.cpp
+OBJS=$(SRC:.cpp=.o)
 
-debug:
-	g++ -g -o dblite.dbg -O0 Application.cpp $(SRC) 
-	g++ -g -o benchmark Benchmark.cpp $(SRC)
-	g++ -g -o genqueries GenerateQueries.cpp
+all: dblite benchmarking
 
-# only compile data generator &  benchmark tool
-benchmarking:
-	g++ -g -o genqueries GenerateQueries.cpp
-	g++ -g -o benchmark Benchmark.cpp $(SRC)
+dblite: $(OBJS) Application.o
+	$(CXX) -o dblite ${OBJS} Application.o
+
+benchmarking: genqueries benchmark
+
+genqueries: $(OBJS) GenerateQueries.o 
+	$(CXX) $(CXXFLAGS) -o genqueries $(OBJS) GenerateQueries.o
+
+benchmark: Benchmark.o $(OBJS)
+	$(CXX) $(CXXFLAGS) -o benchmark $(OBJS) Benchmark.o
+
+GenerateQueries.o: GenerateQueries.cpp
+	$(CXX) $(CXXFLAGS) -c GenerateQueries.cpp
+
+Benchmark.o: Benchmark.cpp $(SRC)
+	$(CXX) $(CXXFLAGS) -c Benchmark.cpp
+
+Application.o: Application.cpp
+	$(CXX) $(CXXFLAGS) -c Application.cpp
+
+cpp.o:
+	$(CXX) $(CXXFLAGS) -s $< 
 
 clean:
-	rm -rf *.o *~ *.out *.exe *.prog *dbl* *genqueries*
+	rm -rf *.o
+
