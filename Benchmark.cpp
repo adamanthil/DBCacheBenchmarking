@@ -119,19 +119,19 @@ void initialize(const char * catalog = "db.xml", const char * files = "config")
 int main(int argc, char ** argv)
 {
 	// check arguments
-	if(argc < 3) {
-		std::cout << "Must supply 2 arguments: [partition-materialization] [number of threads]" << std::endl;
+	if(argc < 4) {
+		std::cout << "Must supply 3 arguments: [config file] [partition-materialization] [number of threads]" << std::endl;
 		exit(1);
 	}
 	
-	bool materialization = atoi(argv[1]);	// use materialization
-	int numThreads = atoi(argv[2]); // number of available threads
+	bool materialization = atoi(argv[2]);	// use materialization
+	int numThreads = atoi(argv[3]); // number of available threads
 	int availThreads = numThreads;	// number of available threads
 	
 	// Setup database
 	//DataCreator::CreateDB("createdb",false);	// Should not create every time, just load existing files
     const char * catalog = "db.xml";
-    const char * files = "config";
+    const char * files = argv[1];
 	initialize(catalog, files);
 	
 	// Set materialization according to cmd line argument
