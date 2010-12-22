@@ -28,6 +28,9 @@ void DataCreator::CreateDB(const std::string & configFile, bool makeHuman)
     int nBytes = atoi(numBytes.c_str());
     std::vector<std::pair<bool,int> > * types = new std::vector<std::pair<bool, int> >();
     char * record_buf = new char[nBytes*nRecords];
+
+    std::cout << "creating " << tabName << "...generating synthetic data...";
+    std::cout.flush();
       for(int i = 0; i < nFields; i++)
       {
         std::string fType;
@@ -228,8 +231,11 @@ void DataCreator::CreateDB(const std::string & configFile, bool makeHuman)
 	  }
         }
       }
+      std::cout << "saving...";
+      std::cout.flush();
       oFile.write(record_buf, nBytes*nRecords);
-    oFile.close();
+      oFile.close();
+      std::cout << "done!" << std::endl;
     if(makeHuman)
     {
       int offset = 0;

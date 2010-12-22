@@ -98,9 +98,9 @@ void imode()
 	{
 	  std::string catalog = "db.xml";
 	  std::string files = "config";
-	  std::string newline;
+	  //std::string newline;
 	  std::cin >> files >> catalog;
-	  getline(std::cin, newline);
+	  //getline(std::cin, newline);
 
 	  initialize(catalog.c_str(), files.c_str());
 	}
