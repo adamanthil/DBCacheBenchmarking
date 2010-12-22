@@ -141,8 +141,9 @@ void query14(std::stringstream & text)
 {
 	int number = rand() % 10000 + 1;
 	char char1 = (char)(rand() % 26 + 65);
+	const char * op = getOperator(rand() % 4);
 	text << "merge-join(merge-join(sscan(T1:S; S.a, S.b, S.o; ), "
-		<< "sscan(T3:R; R.b, R.m, R.q; R.b >= " << number << " & R.m < '" << char1 << "'); R.b = S.a;)," 
+		<< "sscan(T3:R; R.b, R.m, R.q; R.b >= " << number << " & R.m " << op << " '" << char1 << "'); R.b = S.a;)," 
 		<< " sscan(T5:T; T.d, T.f; ); T.f = R.a; )" << std::endl;
 }
 
