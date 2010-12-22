@@ -1,6 +1,6 @@
 #!/bin/bash
 
-configFiles=(config configPAX configP)
+configFiles=(config configP)
 paritioning=(0 1)
 threads=(5 10 15)
 
@@ -15,8 +15,8 @@ do
 			do
 				(( count= $count + 1 ))
 				echo "executing run $count:"
-				echo "time ./benchmark $i $j $k < queries/queries_175_325 > benchmark-output-$i-$j-$k-run$l"
-				time ./benchmark $i $j $k < queries/queries_175_325 > benchmark-output-$i-$j-$k-run$l
+				echo "time ./benchmark $i $j $k < queries/queries_20_150 > benchmark-output-$i-$j-$k-run$l"
+				(time ./benchmark $i $j $k < queries/queries_20_150) 1> /dev/null 2> benchmark-output-$i-$j-$k-run$l
 			done
 		done
 	done
