@@ -159,7 +159,7 @@ void query15(std::stringstream & text) {
 void query16(std::stringstream & text) {
 	const char * op = getOperator(rand() % 4);
 	char char1 = (char)(rand() % 26 + 65);
-	text << "sscan(T3:t; t.a, t.h, t.f, t.c, t.q; T3.m " << op << " '" << char1 << "')" << std::endl;
+	text << "sscan(T3:t; t.a, t.h, t.f, t.c, t.q, t.m; t.m " << op << " '" << char1 << "')" << std::endl;
 }
 
 void query17(std::stringstream & text) {
@@ -170,11 +170,12 @@ void query17(std::stringstream & text) {
 }
 
 void query18(std::stringstream & text) {
-  const char * op = getOperator(rand() % 4);
+  const char * op1 = getOperator(rand() % 4);
+  const char * op2 = getOperator(rand() % 4);
   char char1 = (char)(rand() % 26 + 65);
   int number = rand() % 10 + 1;
-  text << "merge-join(sscan(T4:R; R.a, R.o, R.f, R.l; R.l " << op << " " << char1 << "), sscan(T5:S; S.a, S.b, S.c, S.f, S.i, S.q, S.e; S.e " 
-    << op << " " << number << "); R.a = S.f; )" << std::endl;
+  text << "merge-join(sscan(T4:R; R.a, R.o, R.f, R.l; R.l " << op1 << " '" << char1 << "'), sscan(T5:S; S.a, S.b, S.c, S.f, S.i, S.q, S.e; S.e " 
+    << op2 << " " << number << "); R.a = S.f; )" << std::endl;
 }
 
 void genQuery(std::stringstream & text, int query) {
