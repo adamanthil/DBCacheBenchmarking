@@ -248,20 +248,19 @@ int main(int argc, char ** argv)
 {
 	// check arguments
 	if(argc > numOptimized + 2) {
-		std::cout << "Supply at most " << (numOptimized + 1) << " arguments: [ratio non-optimized:optimized queries], [numQ1], [numQ2], ..." << std::endl;
+		std::cout << "Supply at most " << (numOptimized + 1) << " arguments: [number non-optimized queries], [numQ1], [numQ2], ..." << std::endl;
 		exit(1);
 	}
 	
 	if(!strcmp(argv[1], "--help") || !strcmp(argv[1], "help")) {
-		std::cout << "Supply at most " << (numOptimized + 1) << " arguments: [ratio non-optimized:optimized queries], [numQ1], [numQ2], ..." << std::endl;
+		std::cout << "Supply at most " << (numOptimized + 1) << " arguments: [number non-optimized queries], [numQ1], [numQ2], ..." << std::endl;
 		exit(0);
 	}
 	
 	int totalOptQueries = 0;	// Total number of optimized queries
 	int * counts = new int[argc - 1];	// Counts of each type of query
 	
-	float ratio = atof(argv[1]);	// Ratio of non-optimized queries to optimized
-	int totalNotOptQueries = 0;
+	int totalNotOptQueries = atoi(argv[1]);	// Ratio of non-optimized queries to optimized
 	int totalQueries = 0;
 	
 	// Loop through number of arguments (number of queries to run)
@@ -271,8 +270,7 @@ int main(int argc, char ** argv)
 		totalOptQueries += count;
 	}
 	
-	// Calculate number of non-optimzed queries to add
-	totalNotOptQueries = (int)(ratio * totalOptQueries);
+	// Calculate total number of queries
 	totalQueries = totalOptQueries + totalNotOptQueries;
 	
 	// Vector to store queries
