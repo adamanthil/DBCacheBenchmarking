@@ -24,6 +24,7 @@ class IRelationalOperator
 		    char fs = '|', char rs = '\n') {}
 
   virtual void layout(const MaterializationLayout * layout) = 0;
+  virtual ~IRelationalOperator() = 0;
 
   /*
   virtual void open() = 0;

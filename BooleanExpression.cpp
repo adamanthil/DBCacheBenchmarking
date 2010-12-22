@@ -103,3 +103,7 @@ bool BooleanTerm::value()
 
   return flag;
 }
+
+IBooleanFactor::~IBooleanFactor() 
+{
+}

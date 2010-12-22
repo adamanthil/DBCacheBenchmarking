@@ -24,6 +24,8 @@ class IBooleanFactor : public IBoolean
     NE
   };
   virtual bool value() = 0;
+  virtual ~IBooleanFactor() = 0;
+
 };
 
 template<typename T>
