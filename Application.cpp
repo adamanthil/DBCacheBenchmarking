@@ -48,19 +48,36 @@ void query(const std::string & query)
   delete op;
 }
 
+void initialize(const char * catalog = "db.xml", const char * files = "config")
+{
+  std::cout << "initializing..."; std::cout.flush();
+  BufferManager::Initialize();
+  std::cout << "loading database info..."; std::cout.flush();
+  Database::Initialize(catalog);
+  std::cout << "loading database tables..."; std::cout.flush();
+  FileManager::Initialize(files);
+  std::cout << "done" << std::endl;
+
+  Settings::set("partition-materialization", true);
+};
+
 void usage()
 {
   std::cout << "dblite [<layout-file> <schema-file>]" << std::endl
-	    << "command       options                   description" << std::endl
-	    << "=======       =======                   ===========" << std::endl
-	    << "help                                    display usage/help" << std::endl
-	    << "query         <query>                   execute query, results are returned to stdout" << std::endl
-	    << "profile       [count] <query>           profiles the query" << std::endl
-	    << "layout        ?|f|p                     gets/sets the current materialization" << std::endl
+	    << "command       options                      description" << std::endl
+	    << "=======       =======                      ===========" << std::endl
+	    << "help                                       display usage/help" << std::endl
+	    << "query         <query>                      execute query, results are returned to stdout" << std::endl
+	    << "profile       [count] <query>              profiles the query" << std::endl
+	    << "load          <partition-config> <schema>  loads the database" << std::endl
+	    << "create        <synthetic-info>             creates a populated synthetic database" << std::endl
+	    << "tables                                     list the tables in the database" << std::endl
+	    << "describe      <table-name>                 list the table schema for the selected table" << std::endl
+	    << "layout        ?|f|p                        gets/sets the current materialization" << std::endl
 	    << "              ? - get current layout" << std::endl
 	    << "              f - singl partition" << std::endl
 	    << "              p - 2-partitons" << std::endl
-	    << "quit                                    exits the program" << std::endl
+	    << "quit                                       exits the program but why would you?" << std::endl
 	    << std::endl;
 }
 
@@ -77,6 +94,16 @@ void imode()
   std::cin >> cmd;
   while (cmd != "quit" && cmd != "exit")
     {
+      if (cmd == "load")
+	{
+	  std::string catalog = "db.xml";
+	  std::string files = "config";
+	  std::string newline;
+	  std::cin >> files >> catalog;
+	  getline(std::cin, newline);
+
+	  initialize(catalog.c_str(), files.c_str());
+	}
       if (cmd == "tables")
 	{
 	  const std::vector<Table *> & tables = db->tables();
@@ -183,6 +210,8 @@ void imode()
 	}
       else
 	{
+	  std::string error;
+	  getline(std::cin, error);
 	  std::cout << "unknown command" << std::endl
 		    << "type help for usage" << std::endl;
 	}
@@ -195,31 +224,17 @@ void imode()
     }
 }
 
-void initialize(const char * catalog = "db.xml", const char * files = "config")
-{
-  std::cout << "initializing..."; std::cout.flush();
-  BufferManager::Initialize();
-  std::cout << "loading database info..."; std::cout.flush();
-  Database::Initialize(catalog);
-  std::cout << "loading database tables..."; std::cout.flush();
-  FileManager::Initialize(files);
-  std::cout << "done" << std::endl;
-};
-
 int main(int argc, char ** argv)
 {
-  const char * catalog = "db.xml";
-  const char * files = "config";
 
-  Settings::set("partition-materialization", true);
-
-  if (argc >= 2)
-    files = argv[1];
-  if (argc >= 3)
-    catalog = argv[2];
-    
+  std::cout << "**************************************************" << std::endl
+	    << "                     db-lite " << std::endl
+	    << "**************************************************" << std::endl << std::endl;
   
-  initialize(catalog, files);
+  std::cout << "Welcome to db-lite interactive mode. " 
+	    << "Please type either create to generate the database or " << std::endl
+	    << "load to load the database. " 
+	    << "You may type help for usage info" << std::endl << std::endl;
   imode();
 }
 

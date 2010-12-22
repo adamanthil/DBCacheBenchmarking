@@ -62,5 +62,5 @@ cpp.o:
 	$(CXX) $(CXXFLAGS) -s $< 
 
 clean:
-	rm -rf *.o *~
+	rm -rf *.o *~ dblite benchmark genqueries
 
