@@ -63,7 +63,7 @@ void initialize(const char * catalog = "db.xml", const char * files = "config")
 
 void usage()
 {
-  std::cout << "dblite [<layout-file> <schema-file>]" << std::endl
+  std::cout << "dblite" << std::endl
 	    << "command       options                      description" << std::endl
 	    << "=======       =======                      ===========" << std::endl
 	    << "help                                       display usage/help" << std::endl
@@ -88,7 +88,7 @@ void imode()
 
   Database * db = Database::getInstance();
 
-  std::cout << "> ";
+  std::cout << "dblite> ";
   std::cout.flush();
 
   std::cin >> cmd;
@@ -216,7 +216,7 @@ void imode()
 		    << "type help for usage" << std::endl;
 	}
 
-      std::cout << "> ";
+      std::cout << "dblite> ";
       std::cout.flush();
 
       history = cmd;
