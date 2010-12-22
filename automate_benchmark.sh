@@ -15,8 +15,8 @@ do
 			do
 				(( count= $count + 1 ))
 				echo "executing run $count:"
-				echo "time ./benchmark $i $j $k < queries/queries_20_150 > benchmark-output-$i-$j-$k-run$l"
-				(time ./benchmark $i $j $k < queries/queries_20_150) 1> /dev/null 2> benchmark-output-$i-$j-$k-run$l
+				echo "time ./benchmark $i $j $k < $1 > benchmark-output-$i-$j-$k-run$l"
+				(time ./benchmark $i $j $k < $1) 1> /dev/null 2> benchmark-output-$i-$j-$k-run$l
 			done
 		done
 	done
