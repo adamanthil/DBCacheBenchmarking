@@ -391,7 +391,7 @@ IBooleanFactor * Parser::boolean_factor()
 	  size_t len = 0; //
 
 	  m_columns.push_back(l);
-	  consume(t);
+	  //consume(t);
 
 	  if (t == ATTRIBUTE) 
 	    {

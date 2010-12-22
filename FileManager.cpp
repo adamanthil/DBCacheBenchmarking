@@ -112,9 +112,57 @@ void FileManager::loadData(const std::string & formatFile)
     int nRecs = 0;
     std::list<int> * pages = new std::list<int>();
     MemoryBlock * data = new MemoryBlock(m_pageSize);
+    char * holder = new char[recordsPerPage*nBytesPerRecord];
 
+    for(int k = 0; k < nRecords;)
+    {
+      int recordsRead = 0;
+      if ((nRecords - k) < recordsPerPage)
+      {
+        recordsRead = nRecords-k;
+      }
+      else
+      {
+        recordsRead = recordsPerPage;
+      }
     
-    for (int k = 0; k < nRecords; k++)
+      table.read(holder,recordsRead*nBytesPerRecord);
+      k+= recordsRead;
+      
+      int hOffset = 0;
+      for (int r = 0; r < recordsRead; r++)
+      {
+        for (int z = 0; z < nFields; z++)
+        {
+	 
+          int fB = FtoBMap[z];
+          int currentPartition = FtoPMap[z];
+          int writeLocation = currentPositions[currentPartition];
+	
+ 
+          data->put((byte*)holder + hOffset, writeLocation, fB);
+	
+	  currentPositions[currentPartition] = writeLocation + fB;
+
+          hOffset += fB;
+        }	
+      }
+      
+      for(int l = 0; l < nPartitions; l++)
+      {
+        currentPositions[l] = startPositions[l];
+      }
+      pages->push_back(bufferLoc);
+      data->setSize(recordsRead);
+      DiskPage *dp = new DiskPage(a, data, tableName);
+      bufferLoc++;
+      m_files.push_back(dp);
+      data = new MemoryBlock(m_pageSize);
+    }
+    m_namePagesMap[tableName] = pages;
+    table.close();
+
+    /*for (int k = 0; k < nRecords; k++)
     {
       if(nRecs == recordsPerPage)
       {
@@ -137,12 +185,14 @@ void FileManager::loadData(const std::string & formatFile)
         int fB = FtoBMap[z];
         int currentPartition = FtoPMap[z];
         int writeLocation = currentPositions[currentPartition];
-        
-        char * wrt = new char[fB];
+	
+	
+	char * wrt = new char[fB];
 	
         table.read(wrt,fB);
         data->put((byte*)wrt, writeLocation, fB);
         delete [] wrt;
+	
 	currentPositions[currentPartition] = writeLocation + fB;
 	
       }
@@ -155,7 +205,7 @@ void FileManager::loadData(const std::string & formatFile)
     m_files.push_back(dp);
     m_namePagesMap[tableName] = pages;
     table.close();
-    
+    */    
   }
   pageFormat.close();
 }
