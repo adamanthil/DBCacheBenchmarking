@@ -17,6 +17,7 @@ class Partition
     std::vector<const Attribute * > m_items;
   public:
     Partition();
+    ~Partition();
     void add(const Attribute * at);
     void setOffset(int offset);
     void calcSize(int numRecords);

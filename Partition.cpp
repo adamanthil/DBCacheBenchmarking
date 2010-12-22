@@ -7,6 +7,11 @@ Partition::Partition()
   m_size = 0;
 }
 
+Partition::~Partition()
+{
+  m_items.clear();
+}
+
 void Partition::add(const Attribute * at)
 {
   m_fMap[at->qualifiedName()] = m_numBytes;

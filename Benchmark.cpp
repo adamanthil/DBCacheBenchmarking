@@ -42,62 +42,60 @@ public:
 
 void * executeQueries(void * ptr)
 {
-	std::queue<QueryContainer*> * queue;
-	queue = (std::queue<QueryContainer*> *) ptr;
-
-	QueryContainer * container;
-	Parser p;
-
-	pthread_mutex_lock (&mutexqueue);
-	bool empty = queue->empty();
-	if(!empty) {
-		container = queue->front();
-		queue->pop();
-	}
-	pthread_mutex_unlock (&mutexqueue);
-
-	while(!empty) {
-
-		// Execute Query (only for testing)
-		//IRelationalOperator * op =  p.parse(*container->query);
-		//op->dump(std::cout);
-		//delete op;
-		
-		// Profile Query
-		Query q(0, p.parse(*container->query));
-		q.profile();
-
-		// Check if queue has more elements
-		pthread_mutex_lock (&mutexqueue);
-		empty = queue->empty();
-		if(!empty) {
-			// Free memory before resetting it
-			delete container->query;
-			delete container;
-			
-			container = queue->front();
-			queue->pop();
-		}
-		pthread_mutex_unlock (&mutexqueue);
-	}
-
-	pthread_exit(0);
+  std::queue<QueryContainer*> * queue;
+  queue = (std::queue<QueryContainer*> *) ptr;
+  
+  QueryContainer * container;
+  Parser p;
+  
+  pthread_mutex_lock (&mutexqueue);
+  bool empty = queue->empty();
+  if(!empty) {
+    container = queue->front();
+    queue->pop();
+  }
+  pthread_mutex_unlock (&mutexqueue);
+  
+  while(!empty) {
+    
+    // Profile Query
+    Query q(0, p.parse(*container->query));
+    q.profile();
+    
+    // Check if queue has more elements
+    pthread_mutex_lock (&mutexqueue);
+    empty = queue->empty();
+    
+    delete container->query;
+    delete container;
+    
+    if(!empty) {
+      // Free memory before resetting it	
+      container = queue->front();
+      queue->pop();
+    }
+    pthread_mutex_unlock (&mutexqueue);
+  }
+  
+  pthread_exit(0);
 }
 
-pthread_t ** initializeThreads(int numThreads, std::queue<QueryContainer*> * queries) {
-	pthread_t ** threads = new pthread_t*[numThreads];	// Array of pointers to threads
-	for(int i = 0; i < numThreads; i++) {
-		threads[i] = new pthread_t();
-		int retVal = pthread_create( threads[i], NULL, executeQueries, (void*) queries);
-	}
-	return threads;
+pthread_t ** initializeThreads(int numThreads, std::queue<QueryContainer*> * queries) 
+{
+  pthread_t ** threads = new pthread_t*[numThreads];	// Array of pointers to threads
+  for(int i = 0; i < numThreads; i++) {
+    threads[i] = new pthread_t();
+    int retVal = pthread_create( threads[i], NULL, executeQueries, (void*) queries);
+  }
+  return threads;
 }
 
-void destructThreads(pthread_t ** threads, int numThreads) {
-	for(int i = 0; i < numThreads; i++) {
-		delete threads[i];
-	}
-	delete[] threads;
+void destructThreads(pthread_t ** threads, int numThreads) 
+{
+  for(int i = 0; i < numThreads; i++) {
+    delete threads[i];
+  }
+  delete[] threads;
 }
 
 // Initializes the database
@@ -118,66 +116,66 @@ void initialize(const char * catalog = "db.xml", const char * files = "config")
 //
 int main(int argc, char ** argv)
 {
-	// check arguments
-	if(argc < 4) {
-		std::cout << "Must supply 3 arguments: [config file] [partition-materialization] [number of threads]" << std::endl;
-		exit(1);
-	}
+  // check arguments
+  if(argc < 4) {
+    std::cout << "Must supply 3 arguments: [config file] [partition-materialization] [number of threads]" << std::endl;
+    exit(1);
+  }
+  
+  bool materialization = atoi(argv[2]);	// use materialization
+  int numThreads = atoi(argv[3]); // number of available threads
+  int availThreads = numThreads;	// number of available threads
+  
+  // Setup database
+  //DataCreator::CreateDB("createdb",false);	// Should not create every time, just load existing files
+  const char * catalog = "db.xml";
+  const char * files = argv[1];
+  initialize(catalog, files);
+  
+  // Set materialization according to cmd line argument
+  Settings::get("partition-materialization", materialization);
+  
+  Database * db = Database::getInstance();
+  std::queue<QueryContainer*> * queries = new std::queue<QueryContainer*>();
+  
+  // Read standard input
+  std::string * query = new std::string();	// Declare on heap for thread access.  Thread will delete it
+  getline(std::cin, *query);
+  
+  // Loop to load all queries until there are no more to execute
+  int queryNum = 0;
+  while(*query != "end" && *query != "execute") {
+    QueryContainer * container = new QueryContainer();	// Declared on heap, destroyed after execution
+    container->queryNum = queryNum;
+    container->query = query;
+    
+    queries->push(container);
+    
+    // Load next query from standard input
+    query = new std::string();
+    getline(std::cin, *query);
+    queryNum++;
+  }
+  
+  std::cout << "Begining Execution of " << queryNum << " queries..." << std::endl;
 	
-	bool materialization = atoi(argv[2]);	// use materialization
-	int numThreads = atoi(argv[3]); // number of available threads
-	int availThreads = numThreads;	// number of available threads
-	
-	// Setup database
-	//DataCreator::CreateDB("createdb",false);	// Should not create every time, just load existing files
-    const char * catalog = "db.xml";
-    const char * files = argv[1];
-	initialize(catalog, files);
-	
-	// Set materialization according to cmd line argument
-	Settings::get("partition-materialization", materialization);
-	
-	Database * db = Database::getInstance();
-	std::queue<QueryContainer*> * queries = new std::queue<QueryContainer*>();
-	
-	// Read standard input
-	std::string * query = new std::string();	// Declare on heap for thread access.  Thread will delete it
-	getline(std::cin, *query);
-	
-	// Loop to load all queries until there are no more to execute
-	int queryNum = 0;
-	while(*query != "end" && *query != "execute") {
-		QueryContainer * container = new QueryContainer();	// Declared on heap, destroyed after execution
-		container->queryNum = queryNum;
-		container->query = query;
-		
-		queries->push(container);
-		
-		// Load next query from standard input
-		query = new std::string();
-		getline(std::cin, *query);
-		queryNum++;
-	}
-	
-	std::cout << "Begining Execution of " << queryNum << " queries..." << std::endl;
-	
-	// Setup and start threads
-	pthread_mutex_init(&mutexqueue, NULL);
-	pthread_t ** threads = initializeThreads(numThreads, queries);
-	
-	// Wait for all threads to finish
-	for(int i = 0; i < numThreads; i++) {
-		pthread_join( *threads[i], NULL);
-	}
-	
-	std::cout << "Done!" << std::endl;
-	
-	// memory cleanup
-	pthread_mutex_destroy(&mutexqueue);
-	destructThreads(threads, numThreads);
-	delete queries;
-	
-	return 0;
+  // Setup and start threads
+  pthread_mutex_init(&mutexqueue, NULL);
+  pthread_t ** threads = initializeThreads(numThreads, queries);
+  
+  // Wait for all threads to finish
+  for(int i = 0; i < numThreads; i++) {
+    pthread_join( *threads[i], NULL);
+  }
+  
+  std::cout << "Done!" << std::endl;
+  
+  // memory cleanup
+  pthread_mutex_destroy(&mutexqueue);
+  destructThreads(threads, numThreads);
+  delete queries;
+  
+  return 0;
 }
 
 #endif

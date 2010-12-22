@@ -14,7 +14,7 @@ MaterializationLayout::MaterializationLayout(int n_partitions, size_t capacity, 
 
 MaterializationLayout::~MaterializationLayout()
 {
-  delete m_partitions;
+  delete [] m_partitions;
 }
 
 void MaterializationLayout::add(const std::vector<const Attribute *> & atts)

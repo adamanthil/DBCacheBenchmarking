@@ -34,8 +34,8 @@ void profile(const std::string & query, int  count = 1)
 {
   Parser p;
   Query q(0, p.parse(query));
-  q.profile(count);
 
+  q.profile(count);
   q.stats(std::cout);
 }
 
@@ -179,7 +179,6 @@ void imode()
 	}
       else if (cmd == "help")
 	{
-	  std::cout << "display usage" << std::endl;
 	  usage();
 	}
       else

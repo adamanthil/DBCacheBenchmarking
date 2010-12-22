@@ -2,8 +2,7 @@
 .SUFFIXES: .o .cpp
 
 CXX=g++
-CXXFLAGS=-O0 -g
-#-O3 -funroll-loops
+CXXFLAGS=-O3 -funroll-loops
 SRC=FileManager.cpp \
 	DiskPage.cpp \
 	MemoryBlock.cpp \
@@ -48,7 +47,7 @@ genqueries: $(OBJS) GenerateQueries.o
 	$(CXX) -g -o genqueries $(OBJS) GenerateQueries.o
 
 benchmark: Benchmark.o $(OBJS)
-	$(CXX) -g -o benchmark $(OBJS) Benchmark.o
+	$(CXX) -g -o benchmark -lpthread $(OBJS) Benchmark.o
 
 GenerateQueries.o: GenerateQueries.cpp
 	$(CXX) $(CXXFLAGS) -c GenerateQueries.cpp

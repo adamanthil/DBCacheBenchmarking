@@ -11,7 +11,7 @@ TupleStreamReader::TupleStreamReader(MemoryBlock & block) : m_block(block)
 
 TupleStreamReader::~TupleStreamReader()
 {
-  delete m_layout;
+  //delete m_layout;
 }
 
 void TupleStreamReader::layout(const MaterializationLayout * layout)

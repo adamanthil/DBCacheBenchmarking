@@ -486,4 +486,18 @@ const Schema * MergeJoin::schema() const
  
 void MergeJoin::reset()
 {
+  for (int i = 0; i < N_BRANCHES; i++)
+    {
+      m_child[i]->reset();
+      m_tsr[i]->reset();
+      m_consumed[i] = true;
+      m_eof[i] = false;
+    }
+
+  m_tsw->discard();
+
+  std::for_each(m_merge_stack.begin(), m_merge_stack.end(), free); // free valid in gnu++
+  m_merge_stack.clear();
+  m_merge_with = 0;
+  
 }

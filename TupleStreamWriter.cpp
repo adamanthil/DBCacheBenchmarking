@@ -13,7 +13,7 @@ TupleStreamWriter::TupleStreamWriter(MemoryBlock & block, size_t record_size) : 
 
 TupleStreamWriter::~TupleStreamWriter()
 {
-  delete m_layout;
+  //delete m_layout;
 }
 
 void TupleStreamWriter::layout(const MaterializationLayout * layout)

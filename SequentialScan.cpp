@@ -121,5 +121,8 @@ void SequentialScan::next(MemoryBlock & block)
 
 void SequentialScan::reset()
 {
+  m_rid = 0;
+  m_page = NULL;
   m_fd->reset();
+  m_tsw->discard();
 }
