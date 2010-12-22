@@ -103,7 +103,7 @@ void genQuery(std::stringstream & text, int query) {
 // entry point
 int main(int argc, char ** argv)
 {
-	int totalQueries;
+	int totalQueries = 0;
 	int * counts = new int[argc - 1];	// Counts of each type of query
 	
 	// Loop through number of arguments (number of queries to run)
