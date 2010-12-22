@@ -11,10 +11,13 @@ do
 	do
 		for k in ${threads[@]};
 		do
-			(( count= $count + 1 ))
-			echo "executing run $count:"
-			echo "valgrind --tool=cachegrind ./benchmark $i $j $k < queries/queries_175_325 > benchmark-output-$i-$j-$k"
-			./benchmark $i $j $k < queries/queries_175_325 > benchmark-output-$i-$j-$k
+			for l in 1 2 3 4 5 6 7 8 9 10
+			do
+				(( count= $count + 1 ))
+				echo "executing run $count:"
+				echo "time ./benchmark $i $j $k < queries/queries_175_325 > benchmark-output-$i-$j-$k-run$l"
+				time ./benchmark $i $j $k < queries/queries_175_325 > benchmark-output-$i-$j-$k-run$l
+			done
 		done
 	done
 done
