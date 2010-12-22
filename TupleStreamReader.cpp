@@ -29,7 +29,6 @@ void TupleStreamReader::read(Tuple & t)
 {
   if (m_layout != NULL)
   {
-
     int tuple_offset = 0;
     
     for (int i = 0; i < 2 /* m_layout->npartitions() */; i++)
